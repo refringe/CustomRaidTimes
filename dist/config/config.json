@@ -1,0 +1,26 @@
+{
+    "_comment_1": "Enables the use of the mod. [true/false]",
+    "mod_enabled": true,
+
+    "_comment_2": "Override raid times for all locations regardless of any custom times set below. [true/false]",
+    "master_time_override": false,
+
+    "_comment_3": "Number of minutes to override all raid times to. [integer]",
+    "_comment_4": "Only used if master_time_override is set to true.",
+    "master_time_minutes": 60,
+
+    "_comment_4": "Number of minutes for specific locations. [integer]",
+    "_comment_5": "These will only be used if the master_time_override option is set to false.",
+    "_comment_6": "For some reason, 'bigmap' is the internal name for Customs.",
+    "custom_times": {
+        "bigmap" : 40,
+        "factory4_day" : 20,
+        "factory4_night" : 25,
+        "interchange" : 45,
+        "laboratory" : 35,
+        "lighthouse" : 40,
+        "rezervbase" : 40,
+        "shoreline" : 45,
+        "woods" : 40
+    }
+}
