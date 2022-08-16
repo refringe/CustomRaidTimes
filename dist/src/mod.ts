@@ -14,7 +14,8 @@ class CustomRaidTimes implements IPostDBLoadMod
 
         // Check to see if the mod is enabled.
         const enabled:boolean = this.config.mod_enabled;
-        if (!enabled) {
+        if (!enabled)
+        {
             logger.info("CustomRaidTimes is disabled in the config file. No changes to raid times will be made.");
             return;
         }
