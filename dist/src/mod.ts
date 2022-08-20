@@ -1,7 +1,9 @@
+import { select } from "weighted";
 import { DependencyContainer } from "tsyringe";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
-import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
+import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import type { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
+import type { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
+import type {StaticRouterModService} from "@spt-aki/services/mod/staticRouter/StaticRouterModService";
 
 class CustomRaidTimes implements IPostDBLoadMod
 {
@@ -9,7 +11,7 @@ class CustomRaidTimes implements IPostDBLoadMod
 
     public postDBLoad(container: DependencyContainer): void
     {
-        // Get the logger from the server container
+        // Get the logger from the server container.
         const logger = container.resolve<ILogger>("WinstonLogger");
 
         // Check to see if the mod is enabled.
@@ -19,6 +21,33 @@ class CustomRaidTimes implements IPostDBLoadMod
             logger.info("CustomRaidTimes is disabled in the config file. No changes to raid times will be made.");
             return;
         }
+
+        // Get the router service from the server container.
+        const staticRouterModService = container.resolve<StaticRouterModService>("StaticRouterModService");
+
+        // Recalculate the raid times at the end of every raid.
+        staticRouterModService.registerStaticRouter(
+            "CustomRaidTimes", [{
+                url: "/client/match/offline/end",
+                action: (url, info, sessionId, output) =>
+                {
+                    this.generateCustomRaidTimes(container);
+                    return output;
+                }
+            }], "aki"
+        );
+
+        // Recalculate the raid times when the server starts.
+        this.generateCustomRaidTimes(container);
+    }
+
+    private generateCustomRaidTimes(container: DependencyContainer): void
+    {
+        // Get the logger from the server container.
+        const logger = container.resolve<ILogger>("WinstonLogger");
+
+        // Are we loud?
+        const debug:boolean = this.config.debug;
 
         // Initialize an array of the location names
         const locationNames = [
@@ -44,18 +73,22 @@ class CustomRaidTimes implements IPostDBLoadMod
 
         // Get override options from config file.
         const masterTimeOverride:boolean = this.config.master_time_override;
-        const masterTimeMinutes:number = this.config.master_time_minutes;
+        const masterTimeMinutes:number = this.resolveTimeSettings(this.config.master_time_minutes);
 
         // Loop through each location
         for (const location of locationNames)
         {
+            // Get the config location name.
+            const locationName = this.locationNameLookup(location);
+
             // Set the new raid time for this location.
-            const newRaidTime:number = masterTimeOverride ? masterTimeMinutes : this.config.custom_times[location];
+            const newRaidTime:number = masterTimeOverride ? masterTimeMinutes : this.resolveTimeSettings(this.config.custom_times[locationName]);
 
             // Log any changes from the default map times.
             if (!masterTimeOverride && locations[location].base.EscapeTimeLimit != newRaidTime)
             {
-                logger.info(`CustomRaidTimes: Location '${location}' raid time changed to ${newRaidTime} minutes.`);
+                if (debug)
+                    logger.info(`CustomRaidTimes: Location '${location}' raid time changed to ${newRaidTime} minutes.`);
             }
 
             // Engage.
@@ -64,7 +97,54 @@ class CustomRaidTimes implements IPostDBLoadMod
 
         if (masterTimeOverride)
         {
-            logger.info(`CustomRaidTimes: All map raid times changed to ${masterTimeMinutes} minutes.`);
+            if (debug)
+                logger.info(`CustomRaidTimes: Map raid times changed to ${masterTimeMinutes} minutes.`);
+            else
+                logger.info("CustomRaidTimes: Map raid times updated.");
+        }
+    }
+
+    private resolveTimeSettings(settings): number
+    {
+        const weightedItems = [];
+
+        // Loop through the settings and resolve the min/max values.
+        for (const setting of settings)
+        {
+            if ("minutes" in setting && "weight" in setting)
+            {
+                if (typeof setting.minutes === "object" && "min" in setting.minutes && "max" in setting.minutes)
+                {
+                    // Get the min and max values, generate a random number between them, set the result to the minutes property.
+                    setting.minutes = Math.floor(Math.random() * (setting.minutes.max - setting.minutes.min + 1) + setting.minutes.min);
+                }
+                if (typeof setting.weight === "object" && "min" in setting.weight && "max" in setting.weight)
+                {
+                    // Get the min and max values, generate a random number between them, set the result to the weight property.
+                    setting.weight = Math.floor(Math.random() * (setting.weight.max - setting.weight.min + 1) + setting.weight.min);
+                }
+                weightedItems.push({ [setting.minutes]: setting.weight });
+            }
+        }
+
+        return parseInt(Object.keys(select(weightedItems))[0], 10);
+    }
+
+    private locationNameLookup(location:string): string
+    {
+        // We named the locations in the config file nicer than the database names...
+        switch (location)
+        {
+            case "bigmap":
+                return "customs";
+            case "factory4_day":
+                return "factory_day";
+            case "factory4_night":
+                return "factory_night";
+            case "rezervbase":
+                return "reserve";
+            default:
+                return location;
         }
     }
 }

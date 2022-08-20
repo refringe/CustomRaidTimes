@@ -6,11 +6,11 @@
     "author": "Dinkadactyl",
     "akiVersion": "3.2.1",
     "scripts": {
-        "setup:environment": "npm i",
-        "build:unzipped": "copyfiles -e \"./node_modules/**/*.*\" -e \"./dist/**/*.*\" -e \"./package-lock.json\" -e \"./tsconfig.json\" -e \"./README.txt\" -e \"./mod.code-workspace\" \"./**/*.*\" ./dist",
-        "zip:files": "shx mv dist CustomRaidTimes && bestzip CustomRaidTimes.zip CustomRaidTimes && shx mv CustomRaidTimes dist",
-        "build:zip": "npm run clean:environment && npm run build:unzipped && npm run zip:files",
-        "clean:environment": "node -e \"require('fs').rm('CustomRaidTimes.zip', ()=>{})\" && node -e \"require('fs').rmdir('./dist/',{recursive:true},()=>{})\""
+        "build": "npm run build:clean && npm run build:distribution && npm run build:dependencies && npm run build:compress",
+        "build:clean": "shx rm -f CustomRaidTimes.zip && shx rm -rf ./dist",
+        "build:distribution": "copyfiles -e \"./node_modules/**/*.*\" -e \"./dist/**/*.*\" -e \"./types/**/*.*\" -e \"./package-lock.json\" -e \"./tsconfig.json\" -e \"./README.txt\" -e \"./mod.code-workspace\" \"./**/*.*\" ./dist",
+        "build:dependencies": "shx mkdir -p ./dist/node_modules/weighted && shx cp -r ./node_modules/weighted ./dist/node_modules",
+        "build:compress": "shx mv dist CustomRaidTimes && bestzip CustomRaidTimes.zip CustomRaidTimes && shx mv CustomRaidTimes dist"
     },
     "devDependencies": {
         "@types/node": "^14.15.3",
@@ -21,6 +21,7 @@
         "shx": "^0.3.4",
         "tsyringe": "4.6.0",
         "typescript": "4.6.4",
-        "bestzip": "2.2.1"
+        "bestzip": "2.2.1",
+        "weighted": "^1.0.0"
     }
 }
