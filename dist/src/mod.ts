@@ -9,7 +9,7 @@ class CustomRaidTimes implements IPostDBLoadMod
 {
     private config = require("../config/config.json");
     private container: DependencyContainer;
-    private logger;
+    private logger: ILogger;
     private debug = false;
 
     public postDBLoad(container: DependencyContainer):void
@@ -69,8 +69,11 @@ class CustomRaidTimes implements IPostDBLoadMod
             "woods"
         ];
 
+        // Get the database tables.
+        const tables = this.container.resolve<DatabaseServer>("DatabaseServer").getTables();
+
         // Get the location data
-        const locations = this.container.resolve<DatabaseServer>("DatabaseServer").getTables().locations;
+        const locations = tables.locations;
 
         // Get override options from config file.
         const masterTimeOverride:boolean = this.config.master_time_override;
@@ -100,6 +103,14 @@ class CustomRaidTimes implements IPostDBLoadMod
             { 
                 this.adjustSpawnWaves(locations[location], newRaidTime);
             }
+        }
+
+        // Update the maximum number of bots that can spawn.
+        if (this.config.adjust_bot_waves && tables.globals.config.MaxBotsAliveOnMap !== this.config.maximum_bots)
+        {
+            tables.globals.config.MaxBotsAliveOnMap = this.config.maximum_bots;
+            if (this.debug)
+                this.logger.info(`CustomRaidTimes: The maximum number of bots has been changed to ${this.config.maximum_bots}.`);
         }
 
         if (masterTimeOverride)
