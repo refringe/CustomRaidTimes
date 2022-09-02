@@ -14,9 +14,7 @@
     "_comment": " - The second setting (30 minutes) has a random weighting chosen between the min and max settings. It will be used 2-5 times more often than the third setting value.",
     "_comment": " - The third setting has a random raid time value chosen between the min and max settings (15-20 minutes). Due to the weighting, it will be used 1/10th as often as the first setting.",
     "master_time_minutes": [
-        {"minutes": 60, "weight": 10},
-        {"minutes": 30, "weight": {"min": 2, "max": 5}},
-        {"minutes": {"min": 15, "max": 20}, "weight": 1}
+        {"minutes": 75, "weight": 1}
     ],
 
     "_comment": "Number of minutes for specific locations.",
@@ -54,7 +52,8 @@
 
     "_comment": "If you're using this mod to substantially increase raid times, you may want to enable this to increase the number of",
     "_comment": "bot spawn waves to fill the new raid time. This feature is currently EXPERIMENTAL and may not work as expected, or nicely with other mods.",
-    "adjust_bot_waves": false,
+    "adjust_bot_waves": true,
+    "maximum_bots": 30,
     "maximum_group_gap_minutes": 5,
     "minimum_group_gap_minutes": 3,
     "maximum_wave_per_group": 3,

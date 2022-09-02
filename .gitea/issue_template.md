@@ -27,3 +27,12 @@ Here's a copy of my `config/config.json` file so you can test the same settings:
 ```
 [Paste the contents of your config.json here.]
 ```
+
+Here's a list of other mods that I'm using:
+```
+[Replace the section below with your list of mods loaded on server startup.]
+Mod CustomCameraRecoil version 1.0.2 by Dinkadactyl loaded
+Mod CustomRaidTimes version 1.0.3 by Dinkadactyl loaded
+Mod CustomStamina version 1.0.1 by Dinkadactyl loaded
+Mod OpenExtracts version 1.0.0 by Dinkadactyl loaded
+```

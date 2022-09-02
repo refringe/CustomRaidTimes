@@ -1,3 +1,4 @@
-node_modules
-CustomRaidTimes.zip
+/dist
+/node_modules
+/src/mod.js
 .DS_Store
