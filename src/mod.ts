@@ -98,6 +98,9 @@ class CustomRaidTimes implements IPostDBLoadMod
             // Update the location with the new time.
             locations[location].base.EscapeTimeLimit = newRaidTime;
 
+            // Adjust the timing of train extracts so they always fit within the new raid time.
+            this.adjustTrainExtracts(locations[location], newRaidTime);
+
             // Adjust the AI spawn waves to fit within the new raid times.
             if (this.config.adjust_bot_waves)
             { 
@@ -158,6 +161,100 @@ class CustomRaidTimes implements IPostDBLoadMod
         }
 
         return parseInt(Object.keys(select(weightedItems))[0], 10);
+    }
+
+    /**
+     * Adjust the timing of train extracts so they always fit within the new raid time.
+     * 
+     * @param location Location object from the database.
+     * @param raidTime The new raid time to adjust the train extracts to.
+     * 
+     * @returns void
+     */
+    private adjustTrainExtracts(location:any, raidTime:number):void
+    {
+        for (const exit of location.base.exits)
+        {            
+            if (exit.PassageRequirement == "Train")
+            {
+                // Total raid time.
+                const raidTimeSec = raidTime * 60;
+
+                // The number of seconds that it takes the train to animate into position.
+                // This value change the train extract to 10 seconds before the end of the raid.
+                const trainPositionSec = 97;
+
+                // The number of seconds the user must wait on the train for a successful extract.
+                const trainExtractWaitSec:number = exit.ExfiltrationTime;
+
+                // Number of seconds the train waits before closing the doors and departing.
+                // Default is 7 minutes.
+                let trainWaitSec = 60 * 7;
+
+                // Latest time the train can arrive.
+                let trainArriveLatest = this.calculateLatestTrainArrivalTime(raidTimeSec, trainPositionSec, trainExtractWaitSec, trainWaitSec);
+
+                // Number of seconds to vary the arrival time by.
+                // Default is a 5 minute window.
+                let trainArriveRandomRange = 60 * 5;
+
+                // The earliest time the train can arrive.
+                let trainArriveEarliest = trainArriveLatest - trainArriveRandomRange;
+
+                // If the latest time is in range, but the earliest time is too early, set the earliest time to immediate.
+                if (trainArriveLatest > 0 && trainArriveEarliest < 0)
+                {
+                    trainArriveEarliest = 0;
+                    trainArriveRandomRange = trainArriveLatest;
+                }
+                // If the latest time the train can arrive is too late, get the train to arrive as soon a possible and try to reduce the train wait time.
+                else if (trainArriveLatest <= 0)
+                {
+                    trainArriveEarliest = 0;
+                    trainArriveLatest = 0;
+
+                    // Reduce the train wait time.
+                    do
+                    {
+                        trainWaitSec--;
+                        trainArriveLatest = this.calculateLatestTrainArrivalTime(raidTimeSec, trainPositionSec, trainExtractWaitSec, trainWaitSec);
+                    }
+                    while (trainArriveLatest < 0);
+                }
+
+                if (trainArriveLatest <= 0)
+                    this.logger.warning("CustomRaidTimes: Train export arrival time is too late. Train will not depart before end of raid. Increase raid time to resolve this issue.");
+
+                // If there's enough buffer time, give the user some extra time back to extract elsewhere if they miss the train.
+                // Only do this if there's more than 5 minutes of buffer time.
+                if (trainArriveEarliest > 300)
+                {
+                    // Give the user 20% of the buffer time to extract elsewhere. Minimum of 1 minute.
+                    const adjustmentTime = Math.floor(trainArriveEarliest * 0.2);
+                    trainArriveEarliest = trainArriveEarliest - adjustmentTime;
+                    trainArriveLatest = trainArriveLatest - adjustmentTime;
+                }
+
+                exit.MinTime = trainArriveEarliest;
+                exit.MaxTime = trainArriveLatest;
+                exit.Count = trainWaitSec;
+            }
+        }
+    }
+
+    /**
+     * Simply calculates the train arrival time based on other time settings.
+     * 
+     * @param raidTimeSec The total raid time in seconds.
+     * @param trainPositionSec The time it takes the train to arrive in seconds.
+     * @param trainExtractWaitSec The time the user must wait on the train to extract in seconds.
+     * @param trainWaitSec The time the train waits before closing the doors and departing in seconds.
+     * 
+     * @returns number
+     */
+    private calculateLatestTrainArrivalTime(raidTimeSec:number, trainPositionSec:number, trainExtractWaitSec:number, trainWaitSec:number):number
+    {
+        return raidTimeSec - trainPositionSec - trainExtractWaitSec - trainWaitSec;
     }
 
     /**
@@ -390,7 +487,8 @@ class CustomRaidTimes implements IPostDBLoadMod
         switch (location.toLowerCase())
         {
             case "bigmap":
-                return "ZoneBrige,ZoneCrossRoad,ZoneDormitory,ZoneGasStation,ZoneFactoryCenter,ZoneFactorySide,ZoneOldAZS,ZoneSnipeBrige,ZoneSnipeTower,ZoneSnipeFactory,ZoneBlockPost,ZoneBlockPostSniper,ZoneBlockPostSniper3,ZoneBlockPost,ZoneTankSquare,ZoneWade,ZoneCustoms,ZoneScavBase";
+                // Removed: ZoneSnipeTower,ZoneSnipeFactory,ZoneBlockPostSniper,ZoneBlockPostSniper3
+                return "ZoneBrige,ZoneCrossRoad,ZoneDormitory,ZoneGasStation,ZoneFactoryCenter,ZoneFactorySide,ZoneOldAZS,ZoneSnipeBrige,ZoneBlockPost,ZoneBlockPost,ZoneTankSquare,ZoneWade,ZoneCustoms,ZoneScavBase";
             case "factory4_day":
                 return "BotZone";
             case "factory4_night":
