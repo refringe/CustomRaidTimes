@@ -1,10 +1,10 @@
 {
     "name": "CustomRaidTimes",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "main": "src/mod.js",
     "license": "MIT",
-    "author": "Dinkadactyl",
-    "akiVersion": "3.2.2",
+    "author": "Refringe",
+    "akiVersion": "3.2.3",
     "scripts": {
         "setup": "npm i",
         "build": "node ./packageBuild.ts"
