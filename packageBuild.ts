@@ -35,6 +35,7 @@ const ignoreList = [
     ".eslintrc.json",
     ".gitignore",
     ".DS_Store",
+    ".nvmrc",
     "packageBuild.ts",
     "mod.code-workspace",
     "package-lock.json",
