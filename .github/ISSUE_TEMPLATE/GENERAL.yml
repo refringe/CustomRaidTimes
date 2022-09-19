@@ -74,6 +74,6 @@ body:
     id: tested-alone
     attributes:
       label: "Tested"
-      description: "Many issues are caused by mod compatibility issues. A simple way to tell whether this is a compatibility issue, or a core mod issue is to remove all other mods and see if the problem remains."
+      description: "Sometimes issues are caused by two more more mods conflicting. A simple way to tell whether this is a mod compatibility issue, or a core mod issue is to remove all other mods and see if the problem remains. Have you tried this?"
       options:
         - label: "I have experienced this issue when no other mods have been installed."
