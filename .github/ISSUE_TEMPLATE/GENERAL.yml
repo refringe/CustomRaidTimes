@@ -1,6 +1,6 @@
 name: General Bug Report
 description: File a general bug report
-title: ""
+title: "Bug: "
 labels: ["triage"]
 assignees:
   - refringe
