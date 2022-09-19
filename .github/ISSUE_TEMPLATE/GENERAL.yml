@@ -65,6 +65,7 @@ body:
   - type: checkboxes
     id: tested-alone
     attributes:
-      label: "Many issues are caused by mod compatibility issues. A simple way to tell whether this is a compatibility issue, or a core mod issue is to remove all other mods and see if the problem remains."
+      label: "Tested"
+      description: "Many issues are caused by mod compatibility issues. A simple way to tell whether this is a compatibility issue, or a core mod issue is to remove all other mods and see if the problem remains."
       options:
         - label: "I have experienced this issue when no other mods have been installed."
