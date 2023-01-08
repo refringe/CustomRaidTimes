@@ -181,7 +181,7 @@ class CustomRaidTimes implements IPostDBLoadMod
                 const raidTimeSec = raidTime * 60;
 
                 // The number of seconds that it takes the train to animate into position.
-                // This value change the train extract to 10 seconds before the end of the raid.
+                // This value (97) will help adjust the train extract to a minimum of 10 seconds before the end of the raid.
                 const trainPositionSec = 97;
 
                 // The number of seconds the user must wait on the train for a successful extract.
@@ -201,7 +201,7 @@ class CustomRaidTimes implements IPostDBLoadMod
                 // The earliest time the train can arrive.
                 let trainArriveEarliest = trainArriveLatest - trainArriveRandomRange;
 
-                // If the latest time is in range, but the earliest time is too early, set the earliest time to immediate.
+                // If the latest time is in range, but the earliest time is too early, set the earliest time to immediately.
                 if (trainArriveLatest > 0 && trainArriveEarliest < 0)
                 {
                     trainArriveEarliest = 0;
