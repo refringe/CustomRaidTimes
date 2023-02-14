@@ -1,19 +1,22 @@
-import { select } from "weighted";
+import { IPostDBLoadModAsync } from "@spt-aki/models/external/IPostDBLoadModAsync";
+import { LogBackgroundColor } from "@spt-aki/models/spt/logging/LogBackgroundColor";
+import { LogTextColor } from "@spt-aki/models/spt/logging/LogTextColor";
+import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
+import { StaticRouterModService } from "@spt-aki/services/mod/staticRouter/StaticRouterModService";
 import { DependencyContainer } from "tsyringe";
-import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import type { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
-import type { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
-import type { StaticRouterModService } from "@spt-aki/services/mod/staticRouter/StaticRouterModService";
+import { select } from "weighted";
 
-class CustomRaidTimes implements IPostDBLoadMod
+class CustomRaidTimes implements IPostDBLoadModAsync
 {
-    private config = require("../config/config.json");
+    private config;
     private container: DependencyContainer;
     private logger: ILogger;
     private debug = false;
 
-    public postDBLoad(container: DependencyContainer):void
+    public async postDBLoadAsync(container: DependencyContainer): Promise<void>
     {
+        this.config = await import("../config/config.json");
         this.container = container;
 
         // Get the logger from the server container.
@@ -23,7 +26,7 @@ class CustomRaidTimes implements IPostDBLoadMod
         const enabled:boolean = this.config.mod_enabled;
         if (!enabled)
         {
-            this.logger.info("CustomRaidTimes is disabled in the config file. No changes to raid times will be made.");
+            this.logger.logWithColor("CustomRaidTimes is disabled in the config file.", LogTextColor.RED, LogBackgroundColor.DEFAULT);
             return;
         }
 
@@ -66,6 +69,7 @@ class CustomRaidTimes implements IPostDBLoadMod
             "lighthouse",
             "rezervbase",
             "shoreline",
+            "tarkovstreets",
             "woods"
         ];
 
@@ -92,7 +96,7 @@ class CustomRaidTimes implements IPostDBLoadMod
             if (!masterTimeOverride && locations[location].base.EscapeTimeLimit != newRaidTime)
             {
                 if (this.debug)
-                    this.logger.info(`CustomRaidTimes: Location '${location}' raid time changed to ${newRaidTime} minutes.`);
+                    this.logger.debug(`CustomRaidTimes: Location '${this.locationNameLookup(location)}' raid time changed to ${newRaidTime} minutes.`);
             }
 
             // Update the location with the new time.
@@ -103,9 +107,7 @@ class CustomRaidTimes implements IPostDBLoadMod
 
             // Adjust the AI spawn waves to fit within the new raid times.
             if (this.config.adjust_bot_waves)
-            { 
                 this.adjustSpawnWaves(locations[location], newRaidTime);
-            }
         }
 
         // Update the maximum number of bots that can spawn.
@@ -113,21 +115,16 @@ class CustomRaidTimes implements IPostDBLoadMod
         {
             tables.globals.config.MaxBotsAliveOnMap = this.config.maximum_bots;
             if (this.debug)
-                this.logger.info(`CustomRaidTimes: The maximum number of bots has been changed to ${this.config.maximum_bots}.`);
+                this.logger.debug(`CustomRaidTimes: The maximum number of bots has been changed to ${this.config.maximum_bots}.`);
         }
 
-        if (masterTimeOverride)
-        {
-            if (this.debug)
-                this.logger.info(`CustomRaidTimes: Map raid times changed to ${masterTimeMinutes} minutes.`);
-            else
-                this.logger.info("CustomRaidTimes: Map raid times updated.");
-        }
+        if (masterTimeOverride && this.debug)
+            this.logger.logWithColor(`CustomRaidTimes: All map raid times changed to ${masterTimeMinutes} minutes.`, LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
+        else
+            this.logger.logWithColor("CustomRaidTimes: Map raid times have been regenerated.", LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
 
         if (this.config.adjust_bot_waves)
-        { 
-            this.logger.warning("CustomRaidTimes: Extended spawn waves to fill new raid times. EXPERIMENTAL!");
-        }
+            this.logger.warning("CustomRaidTimes: Extended spawn waves to fill new raid times. Currently experimental... Please share feedback.");
     }
 
     /**
@@ -206,6 +203,9 @@ class CustomRaidTimes implements IPostDBLoadMod
                 {
                     trainArriveEarliest = 0;
                     trainArriveRandomRange = trainArriveLatest;
+
+                    if (this.debug)
+                        this.logger.debug(`CustomRaidTimes: ${location.base.Name} Train Schedule - Adjusted so that it may arrive immediately.`);
                 }
                 // If the latest time the train can arrive is too late, get the train to arrive as soon a possible and try to reduce the train wait time.
                 else if (trainArriveLatest <= 0)
@@ -220,10 +220,16 @@ class CustomRaidTimes implements IPostDBLoadMod
                         trainArriveLatest = this.calculateLatestTrainArrivalTime(raidTimeSec, trainPositionSec, trainExtractWaitSec, trainWaitSec);
                     }
                     while (trainArriveLatest < 0);
+
+                    if (this.debug)
+                        this.logger.debug(`CustomRaidTimes: ${location.base.Name} Train Schedule - Will arrive immediately. Adjusted latest arrival time.`);
                 }
 
+                // TODO: If the raid time is larger then the default(?), adjust the trainArriveEarliest and trainArriveLatest times so that the train will 
+                //       randomly arrive within a larger raid time range. Improvement for longer raids (2-5 hours).
+
                 if (trainArriveLatest <= 0)
-                    this.logger.warning("CustomRaidTimes: Train export arrival time is too late. Train will not depart before end of raid. Increase raid time to resolve this issue.");
+                    this.logger.warning(`CustomRaidTimes: ${location.base.Name} Train Schedule - Train can not depart before end of raid. Increase raid time to resolve this issue.`);
 
                 // If there's enough buffer time, give the user some extra time back to extract elsewhere if they miss the train.
                 // Only do this if there's more than 5 minutes of buffer time.
@@ -470,6 +476,8 @@ class CustomRaidTimes implements IPostDBLoadMod
                 return "factory_night";
             case "rezervbase":
                 return "reserve";
+            case "tarkovstreets":
+                return "streets";
             default:
                 return location;
         }
@@ -503,6 +511,9 @@ class CustomRaidTimes implements IPostDBLoadMod
                 return "ZoneRailStrorage,ZonePTOR1,ZonePTOR2,ZoneBarrack,ZoneBunkerStorage,ZoneSubStorage,ZoneSubCommand";
             case "shoreline":
                 return "ZoneSanatorium1,ZoneSanatorium2,ZonePassFar,ZonePassClose,ZoneTunnel,ZoneStartVillage,ZoneBunker,ZoneGreenHouses,ZoneIsland,ZoneGasStation,ZoneMeteoStation,ZonePowerStation,ZoneBusStation,ZoneRailWays,ZonePort,ZoneForestTruck,ZoneForestSpawn,ZoneForestGasStation";
+            case "tarkovstreets":
+                // Removed: ZoneSnipeBuilding,ZoneSnipeCarShowroom,ZoneSnipeCinema,ZoneSnipeSW01
+                return "ZoneCarShowroom,ZoneCinema,ZoneColumn,ZoneConcordia_1,ZoneConcordia_2,ZoneConcordiaParking,ZoneConstruction,ZoneFactory,ZoneHotel_1,ZoneHotel_2,ZoneSW01";
             case "woods":
                 return "ZoneRedHouse,ZoneWoodCutter,ZoneHouse,ZoneBigRocks,ZoneRoad,ZoneMiniHouse,ZoneScavBase2,ZoneBrokenVill,ZoneClearVill,ZoneHighRocks";
             default:

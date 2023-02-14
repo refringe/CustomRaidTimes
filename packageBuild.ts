@@ -26,27 +26,29 @@ console.log("Previous build files deleted.");
 // we always copy over additional files and directories that authors may have added to their project. This may need to be
 // expanded upon by the mod author to allow for node modules that are used within the mod; example commented out below.
 const ignoreList = [
-    "node_modules/!(weighted)", // Instead of excluding the entire node_modules directory, allow two node modules.
+    "node_modules/!(weighted)",
     "src/**/*.js",
     "types/",
     ".git/",
-    ".github/",
+    ".gitea/",
+	".github/",
+	".nvmrc",
     ".eslintignore",
     ".eslintrc.json",
     ".gitignore",
     ".DS_Store",
-    ".nvmrc",
     "packageBuild.ts",
     "mod.code-workspace",
     "package-lock.json",
     "tsconfig.json",
-    "CustomRaidTime.png"
+	"CustomRaidTime.png"
 ];
 const exclude = glob.sync(`{${ignoreList.join(",")}}`, { realpath: true, dot: true });
 
 // For some reason these basic-bitch functions won't allow us to copy a directory into itself, so we have to resort to
 // using a temporary directory, like an idiot. Excuse the normalize spam; some modules cross-platform, some don't...
-fs.copySync(__dirname, path.normalize(`${__dirname}/../~${modName}`), {filter:(filePath) => {
+fs.copySync(__dirname, path.normalize(`${__dirname}/../~${modName}`), {filter:(filePath) => 
+{
     return !exclude.includes(filePath);
 }});
 fs.moveSync(path.normalize(`${__dirname}/../~${modName}`), path.normalize(`${__dirname}/${modName}`), { overwrite: true });
@@ -59,12 +61,14 @@ zip({
     source: modName,
     destination: `dist/${modName}.zip`,
     cwd: __dirname
-}).catch(function(err) {
+}).catch(function(err)
+{
     console.error("A bestzip error has occurred: ", err.stack);
-}).then(function() {
+}).then(function()
+{
     console.log(`Compressed mod package to: /dist/${modName}.zip`);
 
     // Now that we're done with the compression we can delete the temporary build directory.
     fs.rmSync(`${__dirname}/${modName}`, { force: true, recursive: true });
-    console.log("Build successful!");
+    console.log("Build successful! your zip file has been created and is ready to be uploaded to hub.sp-tarkov.com/files/");
 });

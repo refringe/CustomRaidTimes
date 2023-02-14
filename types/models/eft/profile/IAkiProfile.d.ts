@@ -11,6 +11,12 @@ export interface IAkiProfile {
     vitality: Vitality;
     inraid: Inraid;
     insurance: Insurance[];
+    /** Assort purchases made by player since last trader refresh */
+    traderPurchases?: Record<string, Record<string, TraderPurchaseData>>;
+}
+export declare class TraderPurchaseData {
+    count: number;
+    purchaseTimestamp: number;
 }
 export interface Info {
     id: string;
@@ -37,12 +43,12 @@ export interface Dialogue {
     attachmentsNew: number;
 }
 export interface DialogueInfo {
-    _id: string;
-    type: MessageType;
-    message: MessagePreview;
-    pinned: boolean;
-    new: number;
     attachmentsNew: number;
+    new: number;
+    type: MessageType;
+    pinned: boolean;
+    message: MessagePreview;
+    _id: string;
 }
 export interface Message {
     _id: string;
@@ -93,6 +99,13 @@ export interface DateTime {
 }
 export interface Aki {
     version: string;
+    mods?: ModDetails[];
+}
+export interface ModDetails {
+    name: string;
+    version: string;
+    author: string;
+    dateAdded: number;
 }
 export interface Vitality {
     health: Health;

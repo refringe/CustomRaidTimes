@@ -1,6 +1,6 @@
 name: General Bug Report
 description: File a general bug report
-title: "Bug: "
+title: "[Bug]: "
 labels: ["triage"]
 assignees:
   - refringe
@@ -30,6 +30,7 @@ body:
       label: SPT Version
       description: What version of SPT are you running?
       options:
+        - 3.5.0
         - 3.4.1
         - 3.4.0
         - 3.3.0
@@ -42,54 +43,13 @@ body:
         - 3.1.1
         - 3.1.0
         - 3.0.0
-        - 2.3.1
-        - 2.3.0
     validations:
       required: true
-  - type: input
-    id: config
-    attributes:
-      label: "Mod Config"
-      description: "[Upload the mod config file](https://codepaste.sp-tarkov.com/) and paste the URL here. Set expire to 'never'. Config us found here `/user/mods/<mod>/config/config.json`."
-      placeholder: "https://codepaste.sp-tarkov.com/?6611c5a1892e7de6#C8pJnqG9m9nU6ZS4rKozFRj5ryp7ofP2nvgMQNR2zQnq"
-    validations:
-      required: true
-  - type: input
+  - type: textarea
     id: server-log
     attributes:
-      label: "Server Log"
-      description: "[Upload your server log](https://codepaste.sp-tarkov.com/) and paste the URL here. Set expire to 'never'. Log is found here `/user/logs/server-yyyy-mm-dd-xx.log`."
-      placeholder: "https://codepaste.sp-tarkov.com/?6611c5a1892e7de6#C8pJnqG9m9nU6ZS4rKozFRj5ryp7ofP2nvgMQNR2zQnq"
+      label: Server Log
+      description: Please paste your entire server log into this input. Be sure to include the beginning where all of your mods, and mod versions, are loaded/listed.
+      render: shell
     validations:
       required: true
-  - type: input
-    id: bepinex-log
-    attributes:
-      label: "BepinEx Log"
-      description: "[Upload your Client log](https://codepaste.sp-tarkov.com/) and paste the URL here. Set expire to 'never'. Log is found here `/BepinEx/LogOutput.log`."
-      placeholder: "https://codepaste.sp-tarkov.com/?6611c5a1892e7de6#C8pJnqG9m9nU6ZS4rKozFRj5ryp7ofP2nvgMQNR2zQnq"
-    validations:
-      required: true
-  - type: input
-    id: client-log
-    attributes:
-      label: "Client Log"
-      description: "[Upload your Client log](https://codepaste.sp-tarkov.com/) and paste the URL here. Set expire to 'never'. Log is found here `/Logs/log_<date>_<version>/<date>_<version> traces.log`."
-      placeholder: "https://codepaste.sp-tarkov.com/?6611c5a1892e7de6#C8pJnqG9m9nU6ZS4rKozFRj5ryp7ofP2nvgMQNR2zQnq"
-    validations:
-      required: true
-  - type: input
-    id: profile
-    attributes:
-      label: "Profile"
-      description: "[Upload your profile](https://codepaste.sp-tarkov.com/) and paste the URL here. Set expire to 'never'. Log is found here `/user/profiles/xxxxxxxxxxxx.json`."
-      placeholder: "https://codepaste.sp-tarkov.com/?6611c5a1892e7de6#C8pJnqG9m9nU6ZS4rKozFRj5ryp7ofP2nvgMQNR2zQnq"
-    validations:
-      required: true
-  - type: checkboxes
-    id: tested-alone
-    attributes:
-      label: "Tested"
-      description: "Sometimes issues are caused by two more more mods conflicting. A simple way to tell whether this is a mod compatibility issue, or a core mod issue is to remove all other mods and see if the problem remains. Have you tried this?"
-      options:
-        - label: "I have experienced this issue when no other mods have been installed."

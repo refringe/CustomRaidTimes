@@ -1,8 +1,8 @@
 import { MemberCategory } from "../../enums/MemberCategory";
 export interface IGetFriendListDataResponse {
     Friends: Friend[];
-    Ignore: any[];
-    InIgnoreList: any[];
+    Ignore: string[];
+    InIgnoreList: string[];
 }
 export interface Friend {
     _id: string;

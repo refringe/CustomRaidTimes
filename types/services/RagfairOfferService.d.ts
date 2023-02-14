@@ -5,12 +5,14 @@ import { IItemEventRouterResponse } from "../models/eft/itemEvent/IItemEventRout
 import { IRagfairOffer } from "../models/eft/ragfair/IRagfairOffer";
 import { IRagfairConfig } from "../models/spt/config/IRagfairConfig";
 import { ILogger } from "../models/spt/utils/ILogger";
-import { ItemEventRouter } from "../routers/ItemEventRouter";
+import { EventOutputHolder } from "../routers/EventOutputHolder";
 import { ConfigServer } from "../servers/ConfigServer";
 import { DatabaseServer } from "../servers/DatabaseServer";
 import { SaveServer } from "../servers/SaveServer";
 import { HttpResponseUtil } from "../utils/HttpResponseUtil";
+import { RagfairOfferHolder } from "../utils/RagfairOfferHolder";
 import { TimeUtil } from "../utils/TimeUtil";
+import { LocalisationService } from "./LocalisationService";
 import { RagfairCategoriesService } from "./RagfairCategoriesService";
 export declare class RagfairOfferService {
     protected logger: ILogger;
@@ -20,14 +22,15 @@ export declare class RagfairOfferService {
     protected ragfairServerHelper: RagfairServerHelper;
     protected ragfairCategoriesService: RagfairCategoriesService;
     protected profileHelper: ProfileHelper;
-    protected itemEventRouter: ItemEventRouter;
+    protected eventOutputHolder: EventOutputHolder;
     protected httpResponse: HttpResponseUtil;
+    protected localisationService: LocalisationService;
     protected configServer: ConfigServer;
     protected playerOffersLoaded: boolean;
-    protected expiredOffers: Item[];
-    protected offers: IRagfairOffer[];
+    protected expiredOffers: Record<string, IRagfairOffer>;
     protected ragfairConfig: IRagfairConfig;
-    constructor(logger: ILogger, timeUtil: TimeUtil, databaseServer: DatabaseServer, saveServer: SaveServer, ragfairServerHelper: RagfairServerHelper, ragfairCategoriesService: RagfairCategoriesService, profileHelper: ProfileHelper, itemEventRouter: ItemEventRouter, httpResponse: HttpResponseUtil, configServer: ConfigServer);
+    protected ragfairOfferHandler: RagfairOfferHolder;
+    constructor(logger: ILogger, timeUtil: TimeUtil, databaseServer: DatabaseServer, saveServer: SaveServer, ragfairServerHelper: RagfairServerHelper, ragfairCategoriesService: RagfairCategoriesService, profileHelper: ProfileHelper, eventOutputHolder: EventOutputHolder, httpResponse: HttpResponseUtil, localisationService: LocalisationService, configServer: ConfigServer);
     /**
      * Get all offers
      * @returns IRagfairOffer array
@@ -42,7 +45,7 @@ export declare class RagfairOfferService {
      * Get an array of expired items not yet processed into new offers
      * @returns items that need to be turned into offers
      */
-    getExpiredOffers(): Item[];
+    getExpiredOfferItems(): Item[];
     resetExpiredOffers(): void;
     /**
      * Does the offer exist on the ragfair
@@ -50,8 +53,17 @@ export declare class RagfairOfferService {
      * @returns offer exists - true
      */
     doesOfferExist(offerId: string): boolean;
+    /**
+     * Remove an offer from ragfair by offer id
+     * @param offerId Offer id to remove
+     */
     removeOfferById(offerId: string): void;
-    removeOfferStack(offerID: string, amount: number): void;
+    /**
+     * Reduce size of an offer stack by specified amount
+     * @param offerId Offer to adjust stack size of
+     * @param amount How much to deduct from offers stack size
+     */
+    removeOfferStack(offerId: string, amount: number): void;
     removeAllOffersByTrader(traderId: string): void;
     /**
      * Do the trader offers on flea need to be refreshed
@@ -62,11 +74,9 @@ export declare class RagfairOfferService {
     addPlayerOffers(): void;
     expireStaleOffers(): void;
     /**
-     * Get an array of stale offers that are still shown to player
-     * @returns IRagfairOffer array
+     * Remove stale offer from flea
+     * @param staleOffer Stale offer to process
      */
-    protected getStaleOffers(): IRagfairOffer[];
-    protected isStale(offer: IRagfairOffer, time: number): boolean;
     protected processStaleOffer(staleOffer: IRagfairOffer): void;
     protected returnPlayerOffer(offer: IRagfairOffer): IItemEventRouterResponse;
 }

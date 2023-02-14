@@ -16,7 +16,7 @@ export interface Sell {
 }
 export interface Chance {
     base: number;
-    overprices: number;
+    overpriced: number;
     underpriced: number;
 }
 export interface Time {
@@ -28,12 +28,9 @@ export interface Reputation {
     gain: number;
     loss: number;
 }
-export declare class OfferAdjustment {
-    maxPriceDifferenceBelowHandbookPercent: number;
-    handbookPriceMultipier: number;
-    priceThreshholdRub: number;
-}
 export interface Dynamic {
+    purchasesAreFoundInRaid: boolean;
+    barter: Barter;
     offerAdjustment: OfferAdjustment;
     expiredOfferThreshold: number;
     offerItemCount: MinMax;
@@ -47,7 +44,22 @@ export interface Dynamic {
     rating: MinMax;
     currencies: Record<string, number>;
     showAsSingleStack: string[];
+    removeSeasonalItemsWhenNotInEvent: boolean;
     blacklist: Blacklist;
+}
+export interface Barter {
+    enable: boolean;
+    chancePercent: number;
+    itemCountMin: number;
+    itemCountMax: number;
+    priceRangeVariancePercent: number;
+    minRoubleCostToBecomeBarter: number;
+    itemTypeBlacklist: string[];
+}
+export interface OfferAdjustment {
+    maxPriceDifferenceBelowHandbookPercent: number;
+    handbookPriceMultipier: number;
+    priceThreshholdRub: number;
 }
 export interface Condition {
     conditionChance: number;

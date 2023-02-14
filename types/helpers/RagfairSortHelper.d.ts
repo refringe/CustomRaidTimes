@@ -7,7 +7,7 @@ export declare class RagfairSortHelper {
     protected localeService: LocaleService;
     constructor(databaseServer: DatabaseServer, localeService: LocaleService);
     /**
-     * Sort a list of ragfair offers by something (id/rating/offer name/price/expirty time)
+     * Sort a list of ragfair offers by something (id/rating/offer name/price/expiry time)
      * @param offers Offers to sort
      * @param type How to sort it
      * @param direction Ascending/descending
@@ -18,7 +18,7 @@ export declare class RagfairSortHelper {
     protected sortOffersByRating(a: IRagfairOffer, b: IRagfairOffer): number;
     protected sortOffersByName(a: IRagfairOffer, b: IRagfairOffer): number;
     /**
-     * Order two offers by price value
+     * Order two offers by rouble price value
      * @param a Offer a
      * @param b Offer b
      * @returns

@@ -42,12 +42,22 @@ export declare class RagfairServerHelper {
     protected isItemBlacklisted(itemTemplateId: string): boolean;
     isTrader(userID: string): boolean;
     isPlayer(userID: string): boolean;
-    returnItems(sessionID: string, items: any[]): void;
+    returnItems(sessionID: string, items: Item[]): void;
     calculateDynamicStackCount(tplId: string, isWeaponPreset: boolean): number;
+    /**
+     * Choose a currency at random with bias
+     * @returns currency tpl
+     */
     getDynamicOfferCurrency(): string;
     getMemberType(userID: string): MemberCategory;
     getNickname(userID: string): string;
     getPresetItems(item: any): Item[];
     getPresetItemsByTpl(item: Item): Item[];
+    /**
+     * Generate new unique ids for the children while preserving hierarchy
+     * @param item base item
+     * @param preset
+     * @returns Item array with new IDs
+     */
     reparentPresets(item: Item, preset: Item[]): Item[];
 }

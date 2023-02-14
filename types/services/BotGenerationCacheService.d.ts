@@ -3,50 +3,34 @@ import { IBotBase } from "../models/eft/common/tables/IBotBase";
 import { ILogger } from "../models/spt/utils/ILogger";
 import { JsonUtil } from "../utils/JsonUtil";
 import { RandomUtil } from "../utils/RandomUtil";
+import { LocalisationService } from "./LocalisationService";
 export declare class BotGenerationCacheService {
     protected logger: ILogger;
     protected randomUtil: RandomUtil;
     protected jsonUtil: JsonUtil;
+    protected localisationService: LocalisationService;
     protected botHelper: BotHelper;
-    protected storedBots: IBotBase[];
-    constructor(logger: ILogger, randomUtil: RandomUtil, jsonUtil: JsonUtil, botHelper: BotHelper);
+    protected storedBots: Map<string, IBotBase[]>;
+    constructor(logger: ILogger, randomUtil: RandomUtil, jsonUtil: JsonUtil, localisationService: LocalisationService, botHelper: BotHelper);
     /**
      * Store array of bots in cache, shuffle results before storage
-     * @param botsToStore
+     * @param botsToStore Bots we want to store in the cache
      */
-    storeBots(botsToStore: IBotBase[]): void;
+    storeBots(key: string, botsToStore: IBotBase[]): void;
     /**
      * Find and return a bot based on its role
      * Remove bot from internal array so it can't be retreived again
-     * @param role role to retreive (assault/bossTagilla etc)
+     * @param key role to retreive (assault/bossTagilla etc)
      * @returns IBotBase object
      */
-    getBot(role: string): IBotBase[];
-    /**
-     * Find a bot by its index from cache
-     * @param indexOfBotToReturn index to find bot by
-     * @returns bot profile
-     */
-    protected getBotFromCache(indexOfBotToReturn: number): IBotBase;
-    /**
-     * Remove bot profile by index from cache
-     * @param indexOfBotToReturn Index of bot profile to remove
-     */
-    protected removeBotFromCache(indexOfBotToReturn: number): void;
-    /**
-     * Get index of bot profile that matches criteria
-     * @param role Role of bot wanted
-     * @param getPmc Requested bot a pmc
-     * @returns index of found bot, -1 if not found
-     */
-    protected getIndexOfBotToReturn(role: string, getPmc: boolean): number;
+    getBot(key: string): IBotBase;
     /**
      * Remove all cached bot profiles
      */
     clearStoredBots(): void;
     /**
-     * Does cache have bots
-     * @returns true if empty
+     * Does cache have a bot with requested key
+     * @returns false if empty
      */
-    cacheIsEmpty(): boolean;
+    cacheHasBotOfRole(key: string): boolean;
 }

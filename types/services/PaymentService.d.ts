@@ -11,6 +11,7 @@ import { IProcessSellTradeRequestData } from "../models/eft/trade/IProcessSellTr
 import { ILogger } from "../models/spt/utils/ILogger";
 import { DatabaseServer } from "../servers/DatabaseServer";
 import { HttpResponseUtil } from "../utils/HttpResponseUtil";
+import { LocalisationService } from "./LocalisationService";
 export declare class PaymentService {
     protected logger: ILogger;
     protected httpResponse: HttpResponseUtil;
@@ -19,16 +20,17 @@ export declare class PaymentService {
     protected traderHelper: TraderHelper;
     protected itemHelper: ItemHelper;
     protected inventoryHelper: InventoryHelper;
+    protected localisationService: LocalisationService;
     protected paymentHelper: PaymentHelper;
-    constructor(logger: ILogger, httpResponse: HttpResponseUtil, databaseServer: DatabaseServer, handbookHelper: HandbookHelper, traderHelper: TraderHelper, itemHelper: ItemHelper, inventoryHelper: InventoryHelper, paymentHelper: PaymentHelper);
+    constructor(logger: ILogger, httpResponse: HttpResponseUtil, databaseServer: DatabaseServer, handbookHelper: HandbookHelper, traderHelper: TraderHelper, itemHelper: ItemHelper, inventoryHelper: InventoryHelper, localisationService: LocalisationService, paymentHelper: PaymentHelper);
     /**
      * Take money and insert items into return to server request
-     * @param {Object} pmcData
-     * @param {Object} body
+     * @param {IPmcData} pmcData Player profile
+     * @param {IProcessBuyTradeRequestData} request
      * @param {string} sessionID
      * @returns Object
      */
-    payMoney(pmcData: IPmcData, body: IProcessBuyTradeRequestData, sessionID: string, output: IItemEventRouterResponse): IItemEventRouterResponse;
+    payMoney(pmcData: IPmcData, request: IProcessBuyTradeRequestData, sessionID: string, output: IItemEventRouterResponse): IItemEventRouterResponse;
     /**
      * Receive money back after selling
      * @param {IPmcData} pmcData
@@ -50,7 +52,7 @@ export declare class PaymentService {
      * @param pmcData Player profile to find and remove currency from
      * @param currencyTpl Type of currency to pay
      * @param amountToPay money value to pay
-     * @param sessionID Sessino id
+     * @param sessionID Session id
      * @param output output object to send to client
      * @returns IItemEventRouterResponse
      */
@@ -58,9 +60,17 @@ export declare class PaymentService {
     /**
      * Prioritise player stash first over player inventory
      * Post-raid healing would often take money out of the players pockets/secure container
-     * @param a Firsat money stack item
+     * @param a First money stack item
      * @param b Second money stack item
-     * @returns sorted item
+     * @param inventoryItems players inventory items
+     * @returns sort order
      */
-    protected moneySort(a: Item, b: Item): number;
+    protected prioritiseStashSort(a: Item, b: Item, inventoryItems: Item[]): number;
+    /**
+     * Recursivly check items parents to see if it is inside the players inventory, not stash
+     * @param itemId item id to check
+     * @param inventoryItems player inventory
+     * @returns true if its in inventory
+     */
+    protected isInInventory(itemId: string, inventoryItems: Item[]): boolean;
 }
