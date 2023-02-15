@@ -124,7 +124,7 @@ class CustomRaidTimes implements IPostDBLoadModAsync
             this.logger.logWithColor("CustomRaidTimes: Map raid times have been regenerated.", LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
 
         if (this.config.adjust_bot_waves)
-            this.logger.warning("CustomRaidTimes: Extended spawn waves to fill new raid times. Currently experimental... Please share feedback.");
+            this.logger.warning("CustomRaidTimes: Extended spawn waves to fill new raid times. Please share feedback.");
     }
 
     /**
@@ -185,13 +185,16 @@ class CustomRaidTimes implements IPostDBLoadModAsync
                 const trainExtractWaitSec:number = exit.ExfiltrationTime;
 
                 // Number of seconds the train waits before closing the doors and departing.
-                // Default is 7 minutes.
-                let trainWaitSec = 60 * 7;
+                // Default is random between 14 and 5 minutes.
+                let trainWaitSec = 60 * (Math.floor(Math.random() * (14 - 5) + 5));
+
+                // Minimum number of seconds the train waits before closing the doors and departing in case the time needs to be automatically adjsuted.
+                const minTrainWaitSec = 60;
 
                 // Latest time the train can arrive.
                 let trainArriveLatest = this.calculateLatestTrainArrivalTime(raidTimeSec, trainPositionSec, trainExtractWaitSec, trainWaitSec);
 
-                // Number of seconds to vary the arrival time by.
+                // Number of seconds to vary the arrival time by. Only used for short raids.
                 // Default is a 5 minute window.
                 let trainArriveRandomRange = 60 * 5;
 
@@ -203,10 +206,8 @@ class CustomRaidTimes implements IPostDBLoadModAsync
                 {
                     trainArriveEarliest = 0;
                     trainArriveRandomRange = trainArriveLatest;
-
-                    if (this.debug)
-                        this.logger.debug(`CustomRaidTimes: ${location.base.Name} Train Schedule - Adjusted so that it may arrive immediately.`);
                 }
+
                 // If the latest time the train can arrive is too late, get the train to arrive as soon a possible and try to reduce the train wait time.
                 else if (trainArriveLatest <= 0)
                 {
@@ -219,37 +220,35 @@ class CustomRaidTimes implements IPostDBLoadModAsync
                         trainWaitSec--;
                         trainArriveLatest = this.calculateLatestTrainArrivalTime(raidTimeSec, trainPositionSec, trainExtractWaitSec, trainWaitSec);
                     }
-                    while (trainArriveLatest < 0);
+                    while (trainArriveLatest < 0 && trainWaitSec > minTrainWaitSec);
 
-                    if (this.debug)
-                        this.logger.debug(`CustomRaidTimes: ${location.base.Name} Train Schedule - Will arrive immediately. Adjusted latest arrival time.`);
+                    if (trainArriveLatest < 0)
+                        this.logger.warning(`CustomRaidTimes: Location '${this.locationNameLookup(location.base.Name)}' Train Schedule - Train can not depart before end of raid.`);
                 }
 
-                // TODO: If the raid time is larger then the default(?), adjust the trainArriveEarliest and trainArriveLatest times so that the train will 
-                //       randomly arrive within a larger raid time range. Improvement for longer raids (2-5 hours).
-
-                if (trainArriveLatest <= 0)
-                    this.logger.warning(`CustomRaidTimes: ${location.base.Name} Train Schedule - Train can not depart before end of raid. Increase raid time to resolve this issue.`);
-
-                // If there's enough buffer time, give the user some extra time back to extract elsewhere if they miss the train.
-                // Only do this if there's more than 5 minutes of buffer time.
+                // If there is more than 5 minutes of buffer time before the train arrives, adjust the timing so that the train doesn't always show up at the
+                // end of a raid. Additionally, this should adjust the train schedule timing of longer raid times so that they're somewhat random in nature.
                 if (trainArriveEarliest > 300)
                 {
-                    // Give the user 20% of the buffer time to extract elsewhere. Minimum of 1 minute.
-                    const adjustmentTime = Math.floor(trainArriveEarliest * 0.2);
+                    // Adjust the earliest arrival time by 65% to 20% of the available time. This is a minimum of 1 minute.
+                    const adjustmentPercentage = parseFloat((Math.random() * (0.65 - 0.2) + 0.2).toFixed(2));
+                    const adjustmentTime = Math.floor(trainArriveEarliest * adjustmentPercentage);
+
                     trainArriveEarliest = trainArriveEarliest - adjustmentTime;
-                    trainArriveLatest = trainArriveLatest - adjustmentTime;
                 }
 
                 exit.MinTime = trainArriveEarliest;
                 exit.MaxTime = trainArriveLatest;
                 exit.Count = trainWaitSec;
+
+                if (this.debug)
+                    this.logger.debug(`CustomRaidTimes: Location '${this.locationNameLookup(location.base.Name)}' Train Schedule - Earliest Arrival: ${(trainArriveEarliest / 60).toFixed(2)} minutes, Latest Arrival: ${(trainArriveLatest / 60).toFixed(2)} minutes, Wait Time: ${(trainWaitSec / 60).toFixed(2)} minutes.`);
             }
         }
     }
 
     /**
-     * Simply calculates the train arrival time based on other time settings.
+     * Simply calculates the latest train arrival time based on other time settings.
      * 
      * @param raidTimeSec The total raid time in seconds.
      * @param trainPositionSec The time it takes the train to arrive in seconds.
@@ -275,11 +274,14 @@ class CustomRaidTimes implements IPostDBLoadModAsync
     {
         let waveNumber = 0;
         let largestGroup = 1;
-        const waveTimeMin = this.config.minimum_group_gap_minutes * 60;
+        
+        const groupTimeMin = this.config.minimum_group_gap_minutes * 60;
         const groupTimeMax = this.config.maximum_group_gap_minutes * 60;
+        const groupTimeOffset = (groupTimeMax - groupTimeMin) / 2;
+        const groupTimeMiddle = groupTimeOffset + groupTimeMin;
 
         // Some locations don't have all of their spawn zones opened up. So while we're here...
-        location.base.OpenZones = this.locationSpawnZoneLookup(location.base.Id);
+        location.base.OpenZones = this.locationSpawnZoneLookup(location.base.Id, true);
 
         if (location.base.Id === "laboratory")
         {
@@ -293,10 +295,10 @@ class CustomRaidTimes implements IPostDBLoadModAsync
         if (this.debug)
             this.logger.debug(`There are currently ${existingWavesCount} spawn waves on ${this.locationNameLookup(location.base.Id)}.`);
 
-        // Calculate how many wave groups we need to fill the raid time (worst case).
-        const waveGroupsNeeded = Math.ceil((raidTime * 60) / groupTimeMax);
+        // Calculate how many wave groups we need to fill the raid time.
+        const groupsNeeded = Math.ceil((raidTime * 60) / groupTimeMiddle);
         if (this.debug)
-            this.logger.debug(` -> To fill the raid, ${waveGroupsNeeded} spawn groups are needed.`);
+            this.logger.debug(` -> To fill the raid, ${groupsNeeded} spawn groups are needed.`);
 
         // Fix some wave settings and create initial groups.
         for (const wave of location.base.waves)
@@ -308,7 +310,8 @@ class CustomRaidTimes implements IPostDBLoadModAsync
             wave.number = waveNumber;
 
             // Fill in missing spawn points.
-            wave.SpawnPoints = this.selectRandomSpawnPoint(location.base.Id);
+            if (wave.SpawnPoints == '')
+                wave.SpawnPoints = this.selectRandomSpawnPoint(location.base.Id);
 
             // Fix slot minimums.
             if (wave.slots_max <= 0)
@@ -324,10 +327,12 @@ class CustomRaidTimes implements IPostDBLoadModAsync
                 wave.time_max = groupTimeMax;
             }
 
-            // Build out groups of waves in segments based on the config values
-            for (let currentGroup = 1; currentGroup <= waveGroupsNeeded; currentGroup++)
+            // Assign the default waves group numbers based on their timings.
+            const waveTimeOffset = (wave.time_max - wave.time_min) / 2;
+            const waveTimeMiddle = waveTimeOffset + wave.time_min;
+            for (let currentGroup = 1; currentGroup <= groupsNeeded; currentGroup++)
             {
-                if (wave.time_min >= (waveTimeMin * currentGroup))
+                if (waveTimeMiddle >= (groupTimeMiddle * currentGroup) - groupTimeOffset)
                 {
                     wave.group = currentGroup;
 
@@ -342,7 +347,7 @@ class CustomRaidTimes implements IPostDBLoadModAsync
         if (this.debug)
             this.logger.debug(` -> Largest Group: ${largestGroup}`);
 
-        const missingGroups = this.getMissingGroups(waveGroupsNeeded, location.base.waves);
+        const missingGroups = this.getMissingGroups(groupsNeeded, location.base.waves);
         if (!missingGroups.length)
         {
             return;
@@ -355,7 +360,7 @@ class CustomRaidTimes implements IPostDBLoadModAsync
             const numberOfWaves = Math.floor(Math.random() * (this.config.maximum_wave_per_group - this.config.minimum_wave_per_group + 1)) + this.config.minimum_wave_per_group;
             for (let index = 0; index < numberOfWaves; index++)
             {
-                this.generateNewWaveGroup(group, location.base.waves);
+                this.generateNewWaveGroup(group, location.base.waves, location.base.Id, groupTimeMiddle, groupTimeOffset);
             }
         });
     }
@@ -401,7 +406,7 @@ class CustomRaidTimes implements IPostDBLoadModAsync
      * 
      * @returns void
      */
-    private generateNewWaveGroup(group:number, waves:any):void
+    private generateNewWaveGroup(group:number, waves:any, location:any, groupTimeMiddle:number, groupTimeOffset:number):void
     {
         // Choose an existing wave to copy at random.
         const newWave = {...waves[Math.floor(Math.random() * waves.length)]};
@@ -410,12 +415,14 @@ class CustomRaidTimes implements IPostDBLoadModAsync
         newWave.group = group;
         newWave.number = waves.length;
 
-        const newTimes = this.generateWaveTimes(group);
-
         // Generate new wave times based on the group.
+        const newTimes = this.generateWaveTimes(group, groupTimeMiddle, groupTimeOffset);
         newWave.time_max = newTimes.max;
         newWave.time_min = newTimes.min;
 
+        // Overwrite the spawn zone to make sure that we're not spawning additional snipers.
+        newWave.SpawnPoints = this.selectRandomSpawnPoint(location, false);
+        
         // Tack it on the end.
         waves.push(newWave);
 
@@ -430,12 +437,11 @@ class CustomRaidTimes implements IPostDBLoadModAsync
      * 
      * @returns An object containing the min and max times.
      */
-    private generateWaveTimes(group:number):any
+    private generateWaveTimes(group:number, groupTimeMiddle:number, groupTimeOffset:number):any
     {
-        // TODO: This is a bit of a hack. I need to figure out how to make this more accurate.
         return {
-            min: (this.config.minimum_group_gap_minutes * 60) * group,
-            max: (this.config.maximum_group_gap_minutes * 60) * group - (this.config.minimum_group_gap_minutes * 60)
+            min: (group * groupTimeMiddle) - groupTimeOffset,
+            max: (group * groupTimeMiddle) + groupTimeOffset
         };
     }
 
@@ -443,13 +449,14 @@ class CustomRaidTimes implements IPostDBLoadModAsync
      * Takes a list of comma delimited zones and returns a random zone from the list.
      * 
      * @param locationName The name of the location to get a spawn zone for.
+     * @param sniper Include sniper zones.
      * 
      * @returns A random zone from the list.
      * 
      */
-    private selectRandomSpawnPoint(locationName:string):string
+    private selectRandomSpawnPoint(locationName:string, sniper:boolean = true):string
     {
-        const spawnZones = this.locationSpawnZoneLookup(locationName);
+        const spawnZones = this.locationSpawnZoneLookup(locationName, sniper);
 
         return spawnZones.split(",")[Math.floor(Math.random() * spawnZones.split(",").length)];
     }
@@ -475,6 +482,7 @@ class CustomRaidTimes implements IPostDBLoadModAsync
             case "factory4_night":
                 return "factory_night";
             case "rezervbase":
+            case "reservebase":
                 return "reserve";
             case "tarkovstreets":
                 return "streets";
@@ -487,16 +495,16 @@ class CustomRaidTimes implements IPostDBLoadModAsync
      * Some locations have missing spawn zones in the database. This will return all of the spawn zones for a particular location.
      * 
      * @param location The internal location name.
+     * @param sniper Include sniper zones.
      * 
      * @returns A comma delimited list of spawn zones.
      */
-    private locationSpawnZoneLookup(location:string):string
+    private locationSpawnZoneLookup(location:string, sniper:boolean = true):string
     {
         switch (location.toLowerCase())
         {
             case "bigmap":
-                // Removed: ZoneSnipeTower,ZoneSnipeFactory,ZoneBlockPostSniper,ZoneBlockPostSniper3
-                return "ZoneBrige,ZoneCrossRoad,ZoneDormitory,ZoneGasStation,ZoneFactoryCenter,ZoneFactorySide,ZoneOldAZS,ZoneSnipeBrige,ZoneBlockPost,ZoneBlockPost,ZoneTankSquare,ZoneWade,ZoneCustoms,ZoneScavBase";
+                return "ZoneBrige,ZoneCrossRoad,ZoneDormitory,ZoneGasStation,ZoneFactoryCenter,ZoneFactorySide,ZoneOldAZS,ZoneBlockPost,ZoneBlockPost,ZoneTankSquare,ZoneWade,ZoneCustoms,ZoneScavBase" + (sniper ? ",ZoneSnipeBrige,ZoneSnipeTower,ZoneSnipeFactory,ZoneBlockPostSniper,ZoneBlockPostSniper3" : "");
             case "factory4_day":
                 return "BotZone";
             case "factory4_night":
@@ -506,14 +514,13 @@ class CustomRaidTimes implements IPostDBLoadModAsync
             case "laboratory":
                 return "BotZoneFloor1,BotZoneFloor2,BotZoneBasement";
             case "lighthouse":
-                return "Zone_TreatmentContainers,Zone_LongRoad,Zone_Blockpost,Zone_TreatmentBeach,Zone_Hellicopter,Zone_RoofContainers,Zone_Village,Zone_OldHouse,Zone_RoofRocks,Zone_DestroyedHouse,Zone_Chalet,Zone_SniperPeak,Zone_RoofBeach,Zone_Containers,Zone_TreatmentRocks,Zone_Rocks,Zone_Island";
+                return "Zone_TreatmentContainers,Zone_LongRoad,Zone_Blockpost,Zone_TreatmentBeach,Zone_Hellicopter,Zone_RoofContainers,Zone_Village,Zone_OldHouse,Zone_RoofRocks,Zone_DestroyedHouse,Zone_Chalet,Zone_RoofBeach,Zone_Containers,Zone_TreatmentRocks,Zone_Rocks,Zone_Island" + (sniper ? ",Zone_SniperPeak" : "");
             case "rezervbase":
                 return "ZoneRailStrorage,ZonePTOR1,ZonePTOR2,ZoneBarrack,ZoneBunkerStorage,ZoneSubStorage,ZoneSubCommand";
             case "shoreline":
-                return "ZoneSanatorium1,ZoneSanatorium2,ZonePassFar,ZonePassClose,ZoneTunnel,ZoneStartVillage,ZoneBunker,ZoneGreenHouses,ZoneIsland,ZoneGasStation,ZoneMeteoStation,ZonePowerStation,ZoneBusStation,ZoneRailWays,ZonePort,ZoneForestTruck,ZoneForestSpawn,ZoneForestGasStation";
+                return "ZoneSanatorium1,ZoneSanatorium2,ZonePassFar,ZonePassClose,ZoneTunnel,ZoneStartVillage,ZoneBunker,ZoneGreenHouses,ZoneIsland,ZoneGasStation,ZoneMeteoStation,ZonePowerStation,ZoneBusStation,ZoneRailWays,ZonePort,ZoneForestTruck,ZoneForestSpawn,ZoneForestGasStation" + (sniper ? ",ZonePowerStationSniper,ZoneBunkeSniper" : "");
             case "tarkovstreets":
-                // Removed: ZoneSnipeBuilding,ZoneSnipeCarShowroom,ZoneSnipeCinema,ZoneSnipeSW01
-                return "ZoneCarShowroom,ZoneCinema,ZoneColumn,ZoneConcordia_1,ZoneConcordia_2,ZoneConcordiaParking,ZoneConstruction,ZoneFactory,ZoneHotel_1,ZoneHotel_2,ZoneSW01";
+                return "ZoneCarShowroom,ZoneCinema,ZoneColumn,ZoneConcordia_1,ZoneConcordia_2,ZoneConcordiaParking,ZoneConstruction,ZoneFactory,ZoneHotel_1,ZoneHotel_2,ZoneSW01" + (sniper ? ",ZoneSnipeBuilding,ZoneSnipeCarShowroom,ZoneSnipeCinema,ZoneSnipeSW01" : "");
             case "woods":
                 return "ZoneRedHouse,ZoneWoodCutter,ZoneHouse,ZoneBigRocks,ZoneRoad,ZoneMiniHouse,ZoneScavBase2,ZoneBrokenVill,ZoneClearVill,ZoneHighRocks";
             default:

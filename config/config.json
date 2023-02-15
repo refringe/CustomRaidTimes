@@ -3,7 +3,7 @@
     "mod_enabled": true,
 
     "_comment": "Enables verbose logging. [true/false]",
-    "debug": true,
+    "debug": false,
 
     "_comment": "Override raid times for all locations regardless of any custom times set below. [true/false]",
     "master_time_override": false,
@@ -55,12 +55,11 @@
         ]
     },
 
-    "_comment": "If you're using this mod to substantially increase raid times, you may want to enable this to increase the number of bot spawn",
-    "_comment": "waves to fill the new raid time. This feature is currently EXPERIMENTAL and may not work as expected, or nicely with other mods.",
+    "_comment": "This mod will adjust regular bot spawn waves to ensure that bots continue to spawn throughout the entire raid.",
     "adjust_bot_waves": true,
     "maximum_bots": 35,
-    "maximum_group_gap_minutes": 6,
-    "minimum_group_gap_minutes": 3,
+    "maximum_group_gap_minutes": 8,
+    "minimum_group_gap_minutes": 4,
     "maximum_wave_per_group": 4,
     "minimum_wave_per_group": 1
 }
