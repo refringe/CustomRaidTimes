@@ -13,6 +13,7 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
     private config:any;
     private container:DependencyContainer;
     private logger:ILogger;
+    private enabled:boolean;
     private debug = false;
 
     public async preAkiLoadAsync(container: DependencyContainer): Promise<void>
@@ -24,8 +25,8 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
         this.logger = this.container.resolve<ILogger>("WinstonLogger");
 
         // Check to see if the mod is enabled.
-        const enabled:boolean = this.config.mod_enabled;
-        if (!enabled)
+        this.enabled = this.config.mod_enabled;
+        if (!this.enabled)
         {
             this.logger.logWithColor("CustomRaidTimes is disabled in the config file.", LogTextColor.RED, LogBackgroundColor.DEFAULT);
             return;
@@ -53,6 +54,9 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
 
     public async postDBLoadAsync():Promise<void>
     {
+        if (!this.enabled)
+            return;
+        
         // Initally recalculate the raid times after the database has loaded.
         this.generateCustomRaidTimes();
     }
