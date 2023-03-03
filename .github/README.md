@@ -1,7 +1,17 @@
 This is a mod for Single Player Tarkov.  
 https://www.sp-tarkov.com
 
-Allows you to change the raid time of maps individually or override them all to one single time. Supports weighted, random times.
+The scope of this mod is to allow the you to adjust your raid times, and have the game still function "normally".
+
+Features:
+
+ - Adjust global raid times, or raid times for individual maps.
+ - Raid times can be random ranges, grouped, and weighted.
+ - Extract train schedules automatically adjust to the new raid time.
+ - Bot spawn waves are adjusted so that they continue to spawn until the end of the raid.
+ - Number of active bots is increased.
+
+All options are configurable.
 
 To install:
 
