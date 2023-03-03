@@ -1,22 +1,23 @@
-import { IPostDBLoadModAsync } from "@spt-aki/models/external/IPostDBLoadModAsync";
+import type { IPostDBLoadModAsync } from "@spt-aki/models/external/IPostDBLoadModAsync";
+import type { IPreAkiLoadModAsync } from "@spt-aki/models/external/IPreAkiLoadModAsync";
 import { LogBackgroundColor } from "@spt-aki/models/spt/logging/LogBackgroundColor";
 import { LogTextColor } from "@spt-aki/models/spt/logging/LogTextColor";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
-import { StaticRouterModService } from "@spt-aki/services/mod/staticRouter/StaticRouterModService";
+import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import type { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
+import type { StaticRouterModService } from "@spt-aki/services/mod/staticRouter/StaticRouterModService";
 import { DependencyContainer } from "tsyringe";
 import { select } from "weighted";
 
-class CustomRaidTimes implements IPostDBLoadModAsync
+class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
 {
-    private config;
-    private container: DependencyContainer;
-    private logger: ILogger;
+    private config:any;
+    private container:DependencyContainer;
+    private logger:ILogger;
     private debug = false;
 
-    public async postDBLoadAsync(container: DependencyContainer): Promise<void>
+    public async preAkiLoadAsync(container: DependencyContainer): Promise<void>
     {
-        this.config = await import("../config/config.json");
+        this.config = require("../config/config.json");
         this.container = container;
 
         // Get the logger from the server container.
@@ -33,22 +34,26 @@ class CustomRaidTimes implements IPostDBLoadModAsync
         // We loud?
         this.debug = this.config.debug;
 
-        // Get the router service from the server container.
-        const staticRouterModService = this.container.resolve<StaticRouterModService>("StaticRouterModService");
-
-        // Recalculate the raid times at the end of every raid.
+        // Hook into the match end route to recalculate the raid times.
+        const staticRouterModService = container.resolve<StaticRouterModService>("StaticRouterModService");
         staticRouterModService.registerStaticRouter(
-            "CustomRaidTimes", [{
+            "CustomRaidTimesMatchEnd", [{
                 url: "/client/match/offline/end",
                 action: (url, info, sessionId, output) =>
                 {
+                    if (this.debug)
+                        this.logger.debug("CustomRaidTimes: CustomRaidTimesMatchEnd route has been triggered.");
+
                     this.generateCustomRaidTimes();
                     return output;
                 }
-            }], "aki"
+            }], "CustomRaidTimesMatchEnd"
         );
+    }
 
-        // Recalculate the raid times when the server starts.
+    public async postDBLoadAsync():Promise<void>
+    {
+        // Initally recalculate the raid times after the database has loaded.
         this.generateCustomRaidTimes();
     }
 
@@ -454,7 +459,7 @@ class CustomRaidTimes implements IPostDBLoadModAsync
      * @returns A random zone from the list.
      * 
      */
-    private selectRandomSpawnPoint(locationName:string, sniper:boolean = true):string
+    private selectRandomSpawnPoint(locationName:string, sniper = true):string
     {
         const spawnZones = this.locationSpawnZoneLookup(locationName, sniper);
 
@@ -499,7 +504,7 @@ class CustomRaidTimes implements IPostDBLoadModAsync
      * 
      * @returns A comma delimited list of spawn zones.
      */
-    private locationSpawnZoneLookup(location:string, sniper:boolean = true):string
+    private locationSpawnZoneLookup(location:string, sniper = true):string
     {
         switch (location.toLowerCase())
         {
