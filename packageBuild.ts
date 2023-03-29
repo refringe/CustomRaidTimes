@@ -26,7 +26,7 @@ console.log("Previous build files deleted.");
 // we always copy over additional files and directories that authors may have added to their project. This may need to be
 // expanded upon by the mod author to allow for node modules that are used within the mod; example commented out below.
 const ignoreList = [
-    "node_modules/!(weighted)",
+    "node_modules/!(weighted|json5)",
     "src/**/*.js",
     "types/",
     ".git/",

@@ -13,20 +13,20 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
     private config:any;
     private container:DependencyContainer;
     private logger:ILogger;
-    private enabled:boolean;
     private debug = false;
 
     public async preAkiLoadAsync(container: DependencyContainer): Promise<void>
     {
-        this.config = require("../config/config.json");
+        require("json5/lib/register");
+        this.config = require("../config/config.json5");
+
         this.container = container;
 
         // Get the logger from the server container.
         this.logger = this.container.resolve<ILogger>("WinstonLogger");
 
         // Check to see if the mod is enabled.
-        this.enabled = this.config.mod_enabled;
-        if (!this.enabled)
+        if (!this.config.enabled)
         {
             this.logger.logWithColor("CustomRaidTimes is disabled in the config file.", LogTextColor.RED, LogBackgroundColor.DEFAULT);
             return;
@@ -43,7 +43,7 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
                 action: (url, info, sessionId, output) =>
                 {
                     if (this.debug)
-                        this.logger.debug("CustomRaidTimes: CustomRaidTimesMatchEnd route has been triggered.");
+                        this.logger.logWithColor("CustomRaidTimes: CustomRaidTimesMatchEnd route has been triggered.", LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
 
                     this.generateCustomRaidTimes();
                     return output;
@@ -54,17 +54,15 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
 
     public async postDBLoadAsync():Promise<void>
     {
-        if (!this.enabled)
+        if (!this.config.enabled)
             return;
         
-        // Initally recalculate the raid times after the database has loaded.
+        // Initially recalculate the raid times after the database has loaded.
         this.generateCustomRaidTimes();
     }
 
     /**
      * Generates custom raid times based on a number of configuration values.
-     * 
-     * @returns void
      */
     private generateCustomRaidTimes():void
     {
@@ -105,7 +103,7 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
             if (!masterTimeOverride && locations[location].base.EscapeTimeLimit != newRaidTime)
             {
                 if (this.debug)
-                    this.logger.debug(`CustomRaidTimes: Location '${this.locationNameLookup(location)}' raid time changed to ${newRaidTime} minutes.`);
+                    this.logger.logWithColor(`CustomRaidTimes: Location '${this.locationNameLookup(location)}' raid time changed to ${newRaidTime} minutes.`, LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
             }
 
             // Update the location with the new time.
@@ -124,7 +122,7 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
         {
             tables.globals.config.MaxBotsAliveOnMap = this.config.maximum_bots;
             if (this.debug)
-                this.logger.debug(`CustomRaidTimes: The maximum number of bots has been changed to ${this.config.maximum_bots}.`);
+                this.logger.logWithColor(`CustomRaidTimes: The maximum number of bots has been changed to ${this.config.maximum_bots}.`, LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
         }
 
         if (masterTimeOverride && this.debug)
@@ -133,36 +131,36 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
             this.logger.logWithColor("CustomRaidTimes: Map raid times have been regenerated.", LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
 
         if (this.config.adjust_bot_waves)
-            this.logger.warning("CustomRaidTimes: Extended spawn waves to fill new raid times. Please share feedback.");
+            this.logger.logWithColor("CustomRaidTimes: Extended spawn waves to fill new raid times.", LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
     }
 
     /**
      * Takes the time settings from the config file and resolves the settings into a single time.
-     * 
-     * @param settings The time settings from the config file.
-     * 
-     * @returns number
      */
-    private resolveTimeSettings(settings):number
+    private resolveTimeSettings(settings:any):number
     {
-        const weightedItems = [];
+        const weightedItems:any = [];
 
         // Loop through the settings and resolve the min/max values.
         for (const setting of settings)
         {
             if ("minutes" in setting && "weight" in setting)
             {
+                // Get the min and max values, generate a random number between them, set the result to the minutes property.
+                let minutes:number = 0;
                 if (typeof setting.minutes === "object" && "min" in setting.minutes && "max" in setting.minutes)
-                {
-                    // Get the min and max values, generate a random number between them, set the result to the minutes property.
-                    setting.minutes = Math.floor(Math.random() * (setting.minutes.max - setting.minutes.min + 1) + setting.minutes.min);
-                }
+                    minutes = Math.floor(Math.random() * (setting.minutes.max - setting.minutes.min + 1) + setting.minutes.min);
+                else
+                    minutes = parseInt(setting.minutes, 10);
+
+                // Get the min and max values, generate a random number between them, set the result to the weight property.
+                let weight:number;
                 if (typeof setting.weight === "object" && "min" in setting.weight && "max" in setting.weight)
-                {
-                    // Get the min and max values, generate a random number between them, set the result to the weight property.
-                    setting.weight = Math.floor(Math.random() * (setting.weight.max - setting.weight.min + 1) + setting.weight.min);
-                }
-                weightedItems.push({ [setting.minutes]: setting.weight });
+                    weight = Math.floor(Math.random() * (setting.weight.max - setting.weight.min + 1) + setting.weight.min);
+                else
+                    weight = parseInt(setting.weight, 10);
+
+                weightedItems.push({ [minutes]: weight });
             }
         }
 
@@ -171,11 +169,6 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
 
     /**
      * Adjust the timing of train extracts so they always fit within the new raid time.
-     * 
-     * @param location Location object from the database.
-     * @param raidTime The new raid time to adjust the train extracts to.
-     * 
-     * @returns void
      */
     private adjustTrainExtracts(location:any, raidTime:number):void
     {
@@ -251,20 +244,13 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
                 exit.Count = trainWaitSec;
 
                 if (this.debug)
-                    this.logger.debug(`CustomRaidTimes: Location '${this.locationNameLookup(location.base.Name)}' Train Schedule - Earliest Arrival: ${(trainArriveEarliest / 60).toFixed(2)} minutes, Latest Arrival: ${(trainArriveLatest / 60).toFixed(2)} minutes, Wait Time: ${(trainWaitSec / 60).toFixed(2)} minutes.`);
+                    this.logger.logWithColor(`CustomRaidTimes: ${this.locationNameLookup(location.base.Name).charAt(0).toUpperCase() + this.locationNameLookup(location.base.Name).slice(1)} Train Schedule - Earliest: ${(trainArriveEarliest / 60).toFixed(2)} minutes, Latest: ${(trainArriveLatest / 60).toFixed(2)} minutes, Wait: ${(trainWaitSec / 60).toFixed(2)} minutes.`, LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
             }
         }
     }
 
     /**
      * Simply calculates the latest train arrival time based on other time settings.
-     * 
-     * @param raidTimeSec The total raid time in seconds.
-     * @param trainPositionSec The time it takes the train to arrive in seconds.
-     * @param trainExtractWaitSec The time the user must wait on the train to extract in seconds.
-     * @param trainWaitSec The time the train waits before closing the doors and departing in seconds.
-     * 
-     * @returns number
      */
     private calculateLatestTrainArrivalTime(raidTimeSec:number, trainPositionSec:number, trainExtractWaitSec:number, trainWaitSec:number):number
     {
@@ -273,11 +259,6 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
 
     /**
      * Adjusts the AI spawn waves to fit within the new raid times.
-     * 
-     * @param location Location object from the database.
-     * @param raidTime The new raid time to extend waves to.
-     * 
-     * @returns void
      */
     private adjustSpawnWaves(location:any, raidTime:number):void
     {
@@ -376,11 +357,6 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
     
     /**
      * Loops over the existing waves and returns an array of groups that need to be generated.
-     * 
-     * @param groupsNeeded The number of groups that need to be generated to fill the raid time.
-     * @param waves The existing waves for a location.
-     * 
-     * @returns Array of groups that need to be generated.
      */
     private getMissingGroups(groupsNeeded:number, waves:any):number[]
     {
@@ -409,11 +385,6 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
 
     /**
      * Copies an existing wave and updates some properties to create a new one. Add it to the database.
-     * 
-     * @param group The wave group to generate a new wave for.
-     * @param waves The current waves in a specific location.
-     * 
-     * @returns void
      */
     private generateNewWaveGroup(group:number, waves:any, location:any, groupTimeMiddle:number, groupTimeOffset:number):void
     {
@@ -441,10 +412,6 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
 
     /**
      * Generates a min/max time for a wave based on the group number provided.
-     * 
-     * @param group The group number to generate times for.
-     * 
-     * @returns An object containing the min and max times.
      */
     private generateWaveTimes(group:number, groupTimeMiddle:number, groupTimeOffset:number):any
     {
@@ -456,12 +423,6 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
 
     /**
      * Takes a list of comma delimited zones and returns a random zone from the list.
-     * 
-     * @param locationName The name of the location to get a spawn zone for.
-     * @param sniper Include sniper zones.
-     * 
-     * @returns A random zone from the list.
-     * 
      */
     private selectRandomSpawnPoint(locationName:string, sniper = true):string
     {
@@ -473,10 +434,6 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
     /**
      * We named the locations in the config file nicer than the database names. This function fetches the nice config names
      * using the internal database names.
-     * 
-     * @param location The internal location name.
-     * 
-     * @returns The nice name used in the configuration file.
      */
     private locationNameLookup(location:string):string
     {
@@ -502,11 +459,6 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
 
     /**
      * Some locations have missing spawn zones in the database. This will return all of the spawn zones for a particular location.
-     * 
-     * @param location The internal location name.
-     * @param sniper Include sniper zones.
-     * 
-     * @returns A comma delimited list of spawn zones.
      */
     private locationSpawnZoneLookup(location:string, sniper = true):string
     {
