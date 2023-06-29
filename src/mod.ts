@@ -1,5 +1,3 @@
-import { LogBackgroundColor } from "@spt-aki/models/spt/logging/LogBackgroundColor";
-import { LogTextColor } from "@spt-aki/models/spt/logging/LogTextColor";
 import type { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
 import type { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
 import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
@@ -28,7 +26,7 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
         // Check to see if the mod is enabled.
         if (!this.config.enabled)
         {
-            this.logger.logWithColor("CustomRaidTimes is disabled in the config file.", LogTextColor.RED, LogBackgroundColor.DEFAULT);
+            this.logger.log("CustomRaidTimes is disabled in the config file.", "red");
             return;
         }
 
@@ -43,7 +41,7 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
                 action: (url, info, sessionId, output) =>
                 {
                     if (this.debug)
-                        this.logger.logWithColor("CustomRaidTimes: CustomRaidTimesMatchEnd route has been triggered.", LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
+                        this.logger.log("CustomRaidTimes: CustomRaidTimesMatchEnd route has been triggered.", "gray");
 
                     this.generateCustomRaidTimes();
                     return output;
@@ -99,15 +97,12 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
             // Set the new raid time for this location.
             const newRaidTime:number = masterTimeOverride ? masterTimeMinutes : this.resolveTimeSettings(this.config.custom_times[locationName]);
 
-            // Log any changes from the default map times.
-            if (!masterTimeOverride && locations[location].base.EscapeTimeLimit != newRaidTime)
-            {
-                if (this.debug)
-                    this.logger.logWithColor(`CustomRaidTimes: Location '${this.locationNameLookup(location)}' raid time changed to ${newRaidTime} minutes.`, LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
-            }
-
             // Update the location with the new time.
             locations[location].base.EscapeTimeLimit = newRaidTime;
+
+            // Log map time changes.
+            if (this.debug && !masterTimeOverride)
+                this.logger.log(`CustomRaidTimes: Location '${this.locationNameLookup(location)}' raid time set to ${newRaidTime} minutes.`, "gray");
 
             // Adjust the timing of train extracts so they always fit within the new raid time.
             this.adjustTrainExtracts(locations[location], newRaidTime);
@@ -115,6 +110,10 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
             // Adjust the AI spawn waves to fit within the new raid times.
             if (this.config.adjust_bot_waves)
                 this.adjustSpawnWaves(locations[location], newRaidTime);
+
+            // This is here to make the debug output look nice.
+            if (this.debug && this.config.adjust_bot_waves)
+                this.logger.log("CustomRaidTimes:", "gray");
         }
 
         // Update the maximum number of bots that can spawn.
@@ -122,16 +121,16 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
         {
             tables.globals.config.MaxBotsAliveOnMap = this.config.maximum_bots;
             if (this.debug)
-                this.logger.logWithColor(`CustomRaidTimes: The maximum number of bots has been changed to ${this.config.maximum_bots}.`, LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
+                this.logger.log(`CustomRaidTimes: The maximum number of bots has been changed to ${this.config.maximum_bots}.`, "gray");
         }
 
         if (masterTimeOverride && this.debug)
-            this.logger.logWithColor(`CustomRaidTimes: All map raid times changed to ${masterTimeMinutes} minutes.`, LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
+            this.logger.log(`CustomRaidTimes: All map raid times changed to ${masterTimeMinutes} minutes.`, "cyan");
         else
-            this.logger.logWithColor("CustomRaidTimes: Map raid times have been regenerated.", LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
+            this.logger.log("CustomRaidTimes: Map raid times have been regenerated.", "cyan");
 
         if (this.config.adjust_bot_waves)
-            this.logger.logWithColor("CustomRaidTimes: Extended spawn waves to fill new raid times.", LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
+            this.logger.log("CustomRaidTimes: Extended spawn waves to fill new raid times.", "cyan");
     }
 
     /**
@@ -225,7 +224,7 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
                     while (trainArriveLatest < 0 && trainWaitSec > minTrainWaitSec);
 
                     if (trainArriveLatest < 0)
-                        this.logger.warning(`CustomRaidTimes: Location '${this.locationNameLookup(location.base.Name)}' Train Schedule - Train can not depart before end of raid.`);
+                        this.logger.log(`CustomRaidTimes: Location '${this.locationNameLookup(location.base.Name)}' Train Schedule - Train can not depart before end of raid.`, "yellow");
                 }
 
                 // If there is more than 5 minutes of buffer time before the train arrives, adjust the timing so that the train doesn't always show up at the
@@ -244,7 +243,7 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
                 exit.Count = trainWaitSec;
 
                 if (this.debug)
-                    this.logger.logWithColor(`CustomRaidTimes: ${this.locationNameLookup(location.base.Name).charAt(0).toUpperCase() + this.locationNameLookup(location.base.Name).slice(1)} Train Schedule - Earliest: ${(trainArriveEarliest / 60).toFixed(2)} minutes, Latest: ${(trainArriveLatest / 60).toFixed(2)} minutes, Wait: ${(trainWaitSec / 60).toFixed(2)} minutes.`, LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
+                    this.logger.log(`CustomRaidTimes: Location '${this.locationNameLookup(location.base.Name)}' train schedule - Earliest: ${(trainArriveEarliest / 60).toFixed(2)} minutes, Latest: ${(trainArriveLatest / 60).toFixed(2)} minutes, Wait: ${(trainWaitSec / 60).toFixed(2)} minutes.`, "gray");
             }
         }
     }
@@ -277,18 +276,20 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
         {
             // Labs is... different.
             // TODO: Figure out how to adjust the labs raider waves... maybe.
+            if (this.debug)
+                this.logger.log("CustomRaidTimes: Laboratory spawn waves are currently not adjusted.", "gray");
             return;
         }
 
         // The number of waves already saved in the location.
         const existingWavesCount = location.base.waves.length;
         if (this.debug)
-            this.logger.debug(`There are currently ${existingWavesCount} spawn waves on ${this.locationNameLookup(location.base.Id)}.`);
+            this.logger.log(`CustomRaidTimes: There are currently ${existingWavesCount} spawn waves on ${this.locationNameLookup(location.base.Id)}.`, "gray");
 
         // Calculate how many wave groups we need to fill the raid time.
         const groupsNeeded = Math.ceil((raidTime * 60) / groupTimeMiddle);
         if (this.debug)
-            this.logger.debug(` -> To fill the raid, ${groupsNeeded} spawn groups are needed.`);
+            this.logger.log(`CustomRaidTimes:  -> To fill the raid, ${groupsNeeded} spawn groups are needed.`, "gray");
 
         // Fix some wave settings and create initial groups.
         for (const wave of location.base.waves)
@@ -335,7 +336,7 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
         }
 
         if (this.debug)
-            this.logger.debug(` -> Largest Group: ${largestGroup}`);
+            this.logger.log(`CustomRaidTimes:  -> Largest Group: ${largestGroup}`, "gray");
 
         const missingGroups = this.getMissingGroups(groupsNeeded, location.base.waves);
         if (!missingGroups.length)
@@ -360,7 +361,7 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
      */
     private getMissingGroups(groupsNeeded:number, waves:any):number[]
     {
-        let missingGroupsDebug = " -> Missing Groups: ";
+        let missingGroupsDebug = "CustomRaidTimes:  -> Missing Groups: ";
 
         // Get a list of all of the group numbers that are missing.
         const missingGroups = [...Array(groupsNeeded + 1).keys()].slice(1);
@@ -377,8 +378,9 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
         {
             missingGroupsDebug += `${group}, `;
         });
+
         if (this.debug)
-            this.logger.debug(missingGroupsDebug.substring(0, missingGroupsDebug.length - 2) + " (" + missingGroups.length + " total)");
+            this.logger.log(missingGroupsDebug.substring(0, missingGroupsDebug.length - 2) + " (" + missingGroups.length + " total)", "gray");
 
         return missingGroups;
     }
@@ -407,7 +409,7 @@ class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
         waves.push(newWave);
 
         if (this.debug)
-            this.logger.debug(` --> New Wave Generated - Group: ${newWave.group}, Number: ${newWave.number}, Time: ${newWave.time_min}-${newWave.time_max}, Slots: ${newWave.slots_min}-${newWave.slots_max}, Zone: ${newWave.SpawnPoints}, Type: ${newWave.WildSpawnType}`);
+            this.logger.log(`CustomRaidTimes:  --> New Wave Generated - Group: ${newWave.group}, Number: ${newWave.number}, Time: ${newWave.time_min}-${newWave.time_max}, Slots: ${newWave.slots_min}-${newWave.slots_max}, Zone: ${newWave.SpawnPoints}, Type: ${newWave.WildSpawnType}`, "gray");
     }
 
     /**
