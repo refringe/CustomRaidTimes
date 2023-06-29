@@ -1,12 +1,13 @@
 {
     // Enables the use of the mod.
-    "enabled": true, // [true/false]
+    "enabled": true,
 
     // Enables verbose logging.
-    "debug": false, // [true/false]
+    // Will print out additional information about raid times, train schedules, and spawn wave adjustments.
+    "debug": false,
 
     // Override raid times for all locations regardless of any custom times set below.
-    "master_time_override": false, // [true/false]
+    "master_time_override": false,
 
     // Number of minutes to override all raid times to. Only used if master_time_override is set to true.
     // This example has three options for a raid time value:
@@ -25,42 +26,51 @@
     // (Additional settings, and min/max values may be used).
     "custom_times": {
         "customs": [
-            {"minutes": 40, "weight": 1}
+            {"minutes": 40, "weight": 1},
         ],
         "factory_day": [
             {"minutes": 20, "weight": 1},
         ],
         "factory_night": [
-            {"minutes": 25, "weight": 1}
+            {"minutes": 25, "weight": 1},
         ],
         "interchange": [
-            {"minutes": 40, "weight": 1}
+            {"minutes": 40, "weight": 1},
         ],
         "laboratory": [
-            {"minutes": 35, "weight": 1}
+            {"minutes": 35, "weight": 1},
         ],
         "lighthouse": [
-            {"minutes": 40, "weight": 1}
+            {"minutes": 40, "weight": 1},
         ],
         "reserve": [
-            {"minutes": 40, "weight": 1}
+            {"minutes": 40, "weight": 1},
         ],
         "shoreline": [
-            {"minutes": 45, "weight": 1}
+            {"minutes": 45, "weight": 1},
         ],
         "streets": [
-            {"minutes": 50, "weight": 1}
+            {"minutes": 50, "weight": 1},
         ],
         "woods": [
-            {"minutes": 40, "weight": 1}
+            {"minutes": 40, "weight": 1},
         ],
     },
 
+    // ------------------------------------------------------------
+
     // This mod will adjust regular bot spawn waves to ensure that bots continue to spawn throughout the entire raid.
-    "adjust_bot_waves": true, // [true/false]
+    "adjust_bot_waves": true,
+
     "maximum_bots": 35, // This is on the high-end. Adjust lower if you encounter preformance issues.
-    "maximum_group_gap_minutes": 8,
-    "minimum_group_gap_minutes": 4,
-    "maximum_wave_per_group": 4,
-    "minimum_wave_per_group": 1,
+    
+    // A spawn wave is defined as a semi-random number of bots that spawn at the same time at the same location.
+    // The following settings control the number of spawn waves that happen at once (per spawn group).    
+    "maximum_wave_per_group": 4, // At most, how many locations can have a spawn wave at the same time.
+    "minimum_wave_per_group": 1, // At least, how many locations can have a spawn wave at the same time.
+
+    // A spawn group is a collection of spawn waves that happen in roughly the same time frame.
+    // The following settings control the timing between spawn groups. Larger numbers will generally result in more time between spawns.
+    "maximum_group_gap_minutes": 8, // At most, how many minutes between spawn groups.
+    "minimum_group_gap_minutes": 4, // At least, how many minutes between spawn groups.
 }
