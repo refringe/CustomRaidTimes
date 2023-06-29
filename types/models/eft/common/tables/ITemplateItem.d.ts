@@ -7,6 +7,10 @@ export interface ITemplateItem {
     _proto: string;
 }
 export interface Props {
+    AllowSpawnOnLocations?: any[];
+    ChangePriceCoef?: number;
+    FixedPrice?: boolean;
+    SendToClient?: boolean;
     Name?: string;
     ShortName?: string;
     Description?: string;
@@ -102,7 +106,7 @@ export interface Props {
     MaskSize?: number;
     NoiseIntensity?: number;
     NoiseScale?: number;
-    Color?: Color;
+    Color?: IColor;
     DiffuseIntensity?: number;
     HasHinge?: boolean;
     RampPalette?: string;
@@ -252,14 +256,16 @@ export interface Props {
     CompressorGain?: number;
     CutoffFreq?: number;
     Resonance?: number;
+    RolloffMultiplier?: number;
     CompressorVolume?: number;
     AmbientVolume?: number;
     DryVolume?: number;
+    HighFrequenciesGain?: number;
     foodUseTime?: number;
     foodEffectType?: string;
     StimulatorBuffs?: string;
     effects_health?: IHealthEffect[] | Record<string, Record<string, number>>;
-    effects_damage?: any;
+    effects_damage?: Record<string, IEffectDamageProps>;
     MaximumNumberOfUsage?: number;
     knifeHitDelay?: number;
     knifeHitSlashRate?: number;
@@ -371,6 +377,7 @@ export interface Props {
     ExplosionEffectType?: string;
     LinkedWeapon?: string;
     UseAmmoWithoutShell?: boolean;
+    RandomLootSettings?: IRandomLootSettings;
 }
 export interface IHealthEffect {
     type: string;
@@ -406,8 +413,8 @@ export interface Slot {
     _parent: string;
     _props: SlotProps;
     _max_count?: number;
-    _required: boolean;
-    _mergeSlotWithChildren: boolean;
+    _required?: boolean;
+    _mergeSlotWithChildren?: boolean;
     _proto: string;
 }
 export interface SlotProps {
@@ -435,6 +442,21 @@ export interface StackSlot {
 export interface StackSlotProps {
     filters: SlotFilter[];
 }
+export interface IRandomLootSettings {
+    allowToSpawnIdenticalItems: boolean;
+    allowToSpawnQuestItems: boolean;
+    countByRarity: any[];
+    excluded: IRandomLootExcluded;
+    filters: any[];
+    findInRaid: boolean;
+    maxCount: number;
+    minCount: number;
+}
+export interface IRandomLootExcluded {
+    categoryTemplates: any[];
+    rarity: string[];
+    templates: any[];
+}
 export interface EffectsHealth {
     Energy: EffectsHealthProps;
     Hydration: EffectsHealthProps;
@@ -443,15 +465,15 @@ export interface EffectsHealthProps {
     value: number;
 }
 export interface EffectsDamage {
-    Pain: EffectDamageProps;
-    LightBleeding: EffectDamageProps;
-    HeavyBleeding: EffectDamageProps;
-    Contusion: EffectDamageProps;
-    RadExposure: EffectDamageProps;
-    Fracture: EffectDamageProps;
-    DestroyedPart: EffectDamageProps;
+    Pain: IEffectDamageProps;
+    LightBleeding: IEffectDamageProps;
+    HeavyBleeding: IEffectDamageProps;
+    Contusion: IEffectDamageProps;
+    RadExposure: IEffectDamageProps;
+    Fracture: IEffectDamageProps;
+    DestroyedPart: IEffectDamageProps;
 }
-export interface EffectDamageProps {
+export interface IEffectDamageProps {
     delay: number;
     duration: number;
     fadeOut: number;
@@ -459,7 +481,7 @@ export interface EffectDamageProps {
     healthPenaltyMin?: number;
     healthPenaltyMax?: number;
 }
-export interface Color {
+export interface IColor {
     r: number;
     g: number;
     b: number;

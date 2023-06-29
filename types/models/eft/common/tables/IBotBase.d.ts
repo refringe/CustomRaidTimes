@@ -120,28 +120,29 @@ export interface Inventory {
     sortingTable: string;
     questRaidItems: string;
     questStashItems: string;
-    fastPanel: FastPanel;
+    fastPanel: Record<string, string>;
 }
-export interface FastPanel {
+export interface IBaseJsonSkills {
+    Common: Record<string, Common>;
+    Mastering: Record<string, Mastering>;
+    Points: number;
 }
 export interface Skills {
     Common: Common[];
     Mastering: Mastering[];
     Points: number;
 }
-export interface Common {
+export interface IBaseSkill {
     Id: string;
     Progress: number;
-    PointsEarnedDuringSession?: number;
-    LastAccess?: number;
     max?: number;
     min?: number;
 }
-export interface Mastering {
-    Id: string;
-    Progress: number;
-    max?: number;
-    min?: number;
+export interface Common extends IBaseSkill {
+    PointsEarnedDuringSession?: number;
+    LastAccess?: number;
+}
+export interface Mastering extends IBaseSkill {
 }
 export interface Stats {
     CarriedQuestItems: string[];
@@ -257,7 +258,7 @@ export interface LastPlayerStateInfo {
     Nickname: string;
     Side: string;
     Level: number;
-    MemberCategory: string;
+    MemberCategory: MemberCategory;
 }
 export interface BackendCounter {
     id: string;
@@ -272,6 +273,7 @@ export interface Hideout {
     Production: Record<string, Productive>;
     Areas: HideoutArea[];
     Improvements: Record<string, IHideoutImprovement>;
+    Seed: number;
     sptUpdateLastRunTimestamp: number;
 }
 export interface IHideoutImprovement {

@@ -61,12 +61,12 @@ export declare class InventoryHelper {
     /**
      * Add ammo to ammo boxes
      * @param itemToAdd Item to check is ammo box
-     * @param toDo
+     * @param parentId Ammo box parent id
      * @param output IItemEventRouterResponse object
      * @param sessionID Session id
      * @param pmcData Profile to add ammobox to
      */
-    protected hydrateAmmoBoxWithAmmo(pmcData: IPmcData, itemToAdd: IAddItemTempObject, toDo: string[][], sessionID: string, output: IItemEventRouterResponse): void;
+    protected hydrateAmmoBoxWithAmmo(pmcData: IPmcData, itemToAdd: IAddItemTempObject, parentId: string, sessionID: string, output: IItemEventRouterResponse): void;
     /**
      *
      * @param assortItems Items to add to inventory
@@ -84,8 +84,8 @@ export declare class InventoryHelper {
      */
     removeItem(pmcData: IPmcData, itemId: string, sessionID: string, output?: IItemEventRouterResponse): IItemEventRouterResponse;
     removeItemByCount(pmcData: IPmcData, itemId: string, count: number, sessionID: string, output?: IItemEventRouterResponse): IItemEventRouterResponse;
-    getItemSize(itemTpl: string, itemID: string, inventoryItem: Item[]): Record<number, number>;
-    protected getSizeByInventoryItemHash(itemTpl: string, itemID: string, inventoryItemHash: InventoryHelper.InventoryItemHash): Record<number, number>;
+    getItemSize(itemTpl: string, itemID: string, inventoryItem: Item[]): number[];
+    protected getSizeByInventoryItemHash(itemTpl: string, itemID: string, inventoryItemHash: InventoryHelper.InventoryItemHash): number[];
     protected getInventoryItemHash(inventoryItem: Item[]): InventoryHelper.InventoryItemHash;
     getContainerMap(containerW: number, containerH: number, itemList: Item[], containerId: string): number[][];
     /**
@@ -111,7 +111,13 @@ export declare class InventoryHelper {
     /**
     * Internal helper function to move item within the same profile_f.
     */
-    moveItemInternal(inventoryItems: Item[], body: IInventoryMoveRequestData): void;
+    moveItemInternal(pmcData: IPmcData, inventoryItems: Item[], moveRequest: IInventoryMoveRequestData): void;
+    /**
+     * Update fast panel bindings when an item is moved into a container that doesnt allow quick slot access
+     * @param pmcData Player profile
+     * @param itemBeingMoved item being moved
+     */
+    protected updateFastPanelBinding(pmcData: IPmcData, itemBeingMoved: Item): void;
     /**
     * Internal helper function to handle cartridges in inventory if any of them exist.
     */
@@ -122,6 +128,7 @@ export declare class InventoryHelper {
      * @returns Reward details
      */
     getRandomLootContainerRewardDetails(itemTpl: string): RewardDetails;
+    getInventoryConfig(): IInventoryConfig;
 }
 declare namespace InventoryHelper {
     interface InventoryItemHash {

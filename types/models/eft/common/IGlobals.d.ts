@@ -70,6 +70,7 @@ export interface Config {
     EventType: string[];
     WalkSpeed: xyz;
     SprintSpeed: xyz;
+    SquadSettings: ISquadSettings;
     SkillEnduranceWeightThreshold: number;
     TeamSearchingTimeout: number;
     Insurance: Insurance;
@@ -803,6 +804,11 @@ export interface RestrictionsInRaid {
     TemplateId: string;
     Value: number;
 }
+export interface ISquadSettings {
+    CountOfRequestsToOnePlayer: number;
+    SecondsForExpiredRequest: number;
+    SendRequestDelaySeconds: number;
+}
 export interface Insurance {
     MaxStorageTimeInHour: number;
 }
@@ -950,9 +956,11 @@ export interface Endurance {
     MovementAction: number;
     SprintAction: number;
     GainPerFatigueStack: number;
+    DependentSkillRatios: IDependentSkillRatio[];
     QTELevelMultipliers: Record<string, Record<string, number>>;
 }
 export interface Strength {
+    DependentSkillRatios: IDependentSkillRatio[];
     SprintActionMin: number;
     SprintActionMax: number;
     MovementActionMin: number;
@@ -962,6 +970,10 @@ export interface Strength {
     QTELevelMultipliers: IQTELevelMultiplier[];
     FistfightAction: number;
     ThrowAction: number;
+}
+export interface IDependentSkillRatio {
+    Ratio: number;
+    SkillId: string;
 }
 export interface IQTELevelMultiplier {
     Level: number;

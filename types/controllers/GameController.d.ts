@@ -6,6 +6,7 @@ import { PreAkiModLoader } from "../loaders/PreAkiModLoader";
 import { IEmptyRequestData } from "../models/eft/common/IEmptyRequestData";
 import { IPmcData } from "../models/eft/common/IPmcData";
 import { ICheckVersionResponse } from "../models/eft/game/ICheckVersionResponse";
+import { ICurrentGroupResponse } from "../models/eft/game/ICurrentGroupResponse";
 import { IGameConfigResponse } from "../models/eft/game/IGameConfigResponse";
 import { IServerDetails } from "../models/eft/game/IServerDetails";
 import { IAkiProfile } from "../models/eft/profile/IAkiProfile";
@@ -20,13 +21,17 @@ import { LocalisationService } from "../services/LocalisationService";
 import { OpenZoneService } from "../services/OpenZoneService";
 import { ProfileFixerService } from "../services/ProfileFixerService";
 import { SeasonalEventService } from "../services/SeasonalEventService";
+import { EncodingUtil } from "../utils/EncodingUtil";
+import { JsonUtil } from "../utils/JsonUtil";
 import { TimeUtil } from "../utils/TimeUtil";
 export declare class GameController {
     protected logger: ILogger;
     protected databaseServer: DatabaseServer;
+    protected jsonUtil: JsonUtil;
     protected timeUtil: TimeUtil;
     protected preAkiModLoader: PreAkiModLoader;
     protected httpServerHelper: HttpServerHelper;
+    protected encodingUtil: EncodingUtil;
     protected hideoutHelper: HideoutHelper;
     protected profileHelper: ProfileHelper;
     protected profileFixerService: ProfileFixerService;
@@ -36,11 +41,21 @@ export declare class GameController {
     protected seasonalEventService: SeasonalEventService;
     protected applicationContext: ApplicationContext;
     protected configServer: ConfigServer;
+    protected os: any;
     protected httpConfig: IHttpConfig;
     protected coreConfig: ICoreConfig;
     protected locationConfig: ILocationConfig;
-    constructor(logger: ILogger, databaseServer: DatabaseServer, timeUtil: TimeUtil, preAkiModLoader: PreAkiModLoader, httpServerHelper: HttpServerHelper, hideoutHelper: HideoutHelper, profileHelper: ProfileHelper, profileFixerService: ProfileFixerService, localisationService: LocalisationService, customLocationWaveService: CustomLocationWaveService, openZoneService: OpenZoneService, seasonalEventService: SeasonalEventService, applicationContext: ApplicationContext, configServer: ConfigServer);
+    constructor(logger: ILogger, databaseServer: DatabaseServer, jsonUtil: JsonUtil, timeUtil: TimeUtil, preAkiModLoader: PreAkiModLoader, httpServerHelper: HttpServerHelper, encodingUtil: EncodingUtil, hideoutHelper: HideoutHelper, profileHelper: ProfileHelper, profileFixerService: ProfileFixerService, localisationService: LocalisationService, customLocationWaveService: CustomLocationWaveService, openZoneService: OpenZoneService, seasonalEventService: SeasonalEventService, applicationContext: ApplicationContext, configServer: ConfigServer);
     gameStart(_url: string, _info: IEmptyRequestData, sessionID: string, startTimeStampMS: number): void;
+    /**
+     * BSG have two values for shotgun dispersion, we make sure both have the same value
+     */
+    protected fixShotgunDispersions(): void;
+    /**
+     * Players set botReload to a high value and don't expect the crazy fast reload speeds, give them a warn about it
+     * @param pmcProfile Player profile
+     */
+    protected warnOnActiveBotReloadSkill(pmcProfile: IPmcData): void;
     /**
      * When player logs in, iterate over all active effects and reduce timer
      * TODO - add body part HP regen
@@ -55,6 +70,10 @@ export declare class GameController {
      * Make Rogues spawn later to allow for scavs to spawn first instead of rogues filling up all spawn positions
      */
     protected fixRoguesSpawningInstantlyOnLighthouse(): void;
+    /**
+     * Find and split waves with large numbers of bots into smaller waves - BSG appears to reduce the size of these waves to one bot when they're waiting to spawn for too long
+     */
+    protected splitBotWavesIntoSingleWaves(): void;
     /**
      * Get a list of installed mods and save their details to the profile being used
      * @param fullProfile Profile to add mod details to
@@ -76,5 +95,6 @@ export declare class GameController {
     protected logProfileDetails(fullProfile: IAkiProfile): void;
     getGameConfig(sessionID: string): IGameConfigResponse;
     getServer(): IServerDetails[];
+    getCurrentGroup(sessionId: string): ICurrentGroupResponse;
     getValidGameVersion(): ICheckVersionResponse;
 }
