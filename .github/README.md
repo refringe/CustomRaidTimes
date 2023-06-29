@@ -8,10 +8,13 @@ Features:
  - Adjust global raid times, or raid times for individual maps.
  - Raid times can be random ranges, grouped, and weighted.
  - Extract train schedules automatically adjust to the new raid time.
+   - Earliest arrival time (given enough overall time) can be anywhere in between 35% to 80% of the total raid time, making train arrival less predictable and also more usable in extra long raids.
+   - The number of seconds the train waits before closing the doors and departing is now randomized; but always between 14 and 7 minutes.
+   - Raids can now be as short as 3 minutes and still have an active and functional train extract.
  - Bot spawn waves are adjusted so that they continue to spawn until the end of the raid.
  - Number of active bots is increased.
 
-All options are configurable.
+Many options are configurable.
 
 To install:
 
