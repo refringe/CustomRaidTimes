@@ -1,21 +1,21 @@
-import type { IPostDBLoadModAsync } from "@spt-aki/models/external/IPostDBLoadModAsync";
-import type { IPreAkiLoadModAsync } from "@spt-aki/models/external/IPreAkiLoadModAsync";
 import { LogBackgroundColor } from "@spt-aki/models/spt/logging/LogBackgroundColor";
 import { LogTextColor } from "@spt-aki/models/spt/logging/LogTextColor";
+import type { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
+import type { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
 import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
 import type { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
 import type { StaticRouterModService } from "@spt-aki/services/mod/staticRouter/StaticRouterModService";
 import { DependencyContainer } from "tsyringe";
 import { select } from "weighted";
 
-class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
+class CustomRaidTimes implements IPreAkiLoadMod, IPostDBLoadMod
 {
     private config:any;
     private container:DependencyContainer;
     private logger:ILogger;
     private debug = false;
 
-    public async preAkiLoadAsync(container: DependencyContainer): Promise<void>
+    public preAkiLoad(container: DependencyContainer):void
     {
         require("json5/lib/register");
         this.config = require("../config/config.json5");
@@ -52,7 +52,7 @@ class CustomRaidTimes implements IPreAkiLoadModAsync, IPostDBLoadModAsync
         );
     }
 
-    public async postDBLoadAsync():Promise<void>
+    public postDBLoad():void
     {
         if (!this.config.enabled)
             return;
