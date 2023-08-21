@@ -1,4 +1,4 @@
 /dist
 /node_modules
-/src/mod.js
+/src/*.js
 .DS_Store

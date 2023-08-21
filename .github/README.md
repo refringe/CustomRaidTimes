@@ -1,27 +1,42 @@
-This is a mod for Single Player Tarkov.  
-https://www.sp-tarkov.com
+# Open Extracts
+
+This is a mod for [Single Player Tarkov](https://www.sp-tarkov.com/).
 
 The scope of this mod is to allow the you to adjust your raid times, and have the game still function "normally".
 
-Features:
+## Features:
 
  - Adjust global raid times, or raid times for individual maps.
  - Raid times can be random ranges, grouped, and weighted.
  - Extract train schedules automatically adjust to the new raid time.
-   - Earliest arrival time (given enough overall time) can be anywhere in between 35% to 80% of the total raid time, making train arrival less predictable and also more usable in extra long raids.
-   - The number of seconds the train waits before closing the doors and departing is now randomized; but always between 14 and 7 minutes.
-   - Raids can now be as short as 3 minutes and still have an active and functional train extract.
+     - Earliest arrival time (given enough overall time) can be anywhere in between 35% to 80% of the total raid time, making train arrival less predictable and also more usable in extra long raids.
+    - The number of seconds the train waits before closing the doors and departing is now randomized; but always between 14 and 7 minutes.
+    - Raids can now be as short as 3 minutes and still have an active and functional train extract.
  - Bot spawn waves are adjusted so that they continue to spawn until the end of the raid.
- - Number of active bots is increased.
+ - Number of active bots is increased to account for the longer raid times.
 
-Many options are configurable.
+_\*Many of these options are configurable._
 
-To install:
+## To install:
 
-1. Uncompress the contents of the download into the `./user/mods/` directory.  
-2. Open the `CustomRaidTime/config/config.json5` file to adjust raid time options.
+1. Decompress the contents of the download into your root SPT directory.
+2. Open the `CustomRaidTimes/config/config.json5` file to adjust configuration options.
 3. Leave a review and let me know what you think.
 
 If you experience any problems, please [submit a detailed bug report](https://github.com/refringe/CustomRaidTimes/issues).
 
-Enjoy.
+## To Build Locally:
+
+This project has been built in [Visual Studio Code](https://code.visualstudio.com/) (VSC) using [Node.js](https://nodejs.org/). If you are unfamiliar with Node.js, I recommend using [NVM](https://github.com/nvm-sh/nvm) to manage installation and switching versions. If you do not wish to use NVM, you will need to install the version of Node.js listed within the `.nvmrc` file manually.
+
+This project uses [Prettier](https://prettier.io/) to format code on save.
+
+To build the project locally:
+
+1. Clone the repository.
+2. Open the `mod.code-workspace` file in Visual Studio Code (VSC).
+3. Install the [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) VSC extension.
+4. Install the [JSON5](https://marketplace.visualstudio.com/items?itemName=mrmlnc.vscode-json5) VSC extension.
+5. Run `nvm use` in the terminal.
+6. Run `npm install` in the terminal.
+7. Run `npm run build` in the terminal.

@@ -1,76 +1,66 @@
 {
-    // Enables the use of the mod.
-    "enabled": true,
+    general: {
+        enabled: true,
 
-    // Enables verbose logging.
-    // Will print out additional information about raid times, train schedules, and spawn wave adjustments.
-    "debug": false,
-
-    // Override raid times for all locations regardless of any custom times set below.
-    "master_time_override": false,
-
-    // Number of minutes to override all raid times to. Only used if master_time_override is set to true.
-    // This example has three options for a raid time value:
-    // - The first setting (60 minutes) will be used 10 times more often than the third setting value due to the difference in the weight options.
-    // - The second setting (30 minutes) has a random weighting chosen between the min and max settings. It will be used 2-5 times more often than the third setting value.
-    // - The third setting has a random raid time value chosen between the min and max settings (15-20 minutes). Due to the weighting, it will be used 1/10th as often as the first setting.
-    "master_time_minutes": [
-        {"minutes": 60, "weight": 10},
-        {"minutes": 30, "weight": {"min": 2, "max": 5}},
-        {"minutes": {"min": 15, "max": 20}, "weight": 1},
-    ],
-
-    // Number of minutes for specific locations.
-    // These will only be used if the master_time_override option is set to false.
-    // These values follow the same rules as the master_time_minutes option.
-    // (Additional settings, and min/max values may be used).
-    "custom_times": {
-        "customs": [
-            {"minutes": 40, "weight": 1},
-        ],
-        "factory_day": [
-            {"minutes": 20, "weight": 1},
-        ],
-        "factory_night": [
-            {"minutes": 25, "weight": 1},
-        ],
-        "interchange": [
-            {"minutes": 40, "weight": 1},
-        ],
-        "laboratory": [
-            {"minutes": 35, "weight": 1},
-        ],
-        "lighthouse": [
-            {"minutes": 40, "weight": 1},
-        ],
-        "reserve": [
-            {"minutes": 40, "weight": 1},
-        ],
-        "shoreline": [
-            {"minutes": 45, "weight": 1},
-        ],
-        "streets": [
-            {"minutes": 50, "weight": 1},
-        ],
-        "woods": [
-            {"minutes": 40, "weight": 1},
-        ],
+        // Enables verbose logging for debugging.
+        debug: false,
     },
 
-    // ------------------------------------------------------------
+    raidTimes: {
+        // Override raid times for all locations, ignoring custom times set for individual locations.
+        overrideAll: false,
 
-    // This mod will adjust regular bot spawn waves to ensure that bots continue to spawn throughout the entire raid.
-    "adjust_bot_waves": true,
+        // Override raid times options. Used for all maps, but only when the above `override_all` is set to `true`.
+        //
+        // These are examples of how to use the various options; only a single minutes and weight object is required.
+        // If more than one option is provided, the weights are used to determine how often each object is used. The
+        // higher the weight, the more often it is used relative to the others.
+        //
+        // The minutes and weight options can be a single number, or an object with min and max values which will be
+        // used to generate a random number between the two.
+        override: [
+            { minutes: 60, weight: 10 }, // 60 minute raid, used 10 times more often than a weight of 1.
+            { minutes: 30, weight: { min: 2, max: 5 } }, // 30 minute raid, used 2-5 times more often than a weight of 1.
+            { minutes: { min: 15, max: 20 }, weight: 1 }, // 15-20 minute raid, used as often as any other weight of 1.
+        ],
 
-    "maximum_bots": 35, // This is on the high-end. Adjust lower if you encounter preformance issues.
-    
-    // A spawn wave is defined as a semi-random number of bots that spawn at the same time at the same location.
-    // The following settings control the number of spawn waves that happen at once (per spawn group).    
-    "maximum_wave_per_group": 4, // At most, how many locations can have a spawn wave at the same time.
-    "minimum_wave_per_group": 1, // At least, how many locations can have a spawn wave at the same time.
+        // Custom raid times for specific locations. Used when `override_all` is set to `false`.
+        // The option can be a number, or an object containing minutes and weight options as described above.
+        customTimes: {
+            customs: 40,
+            factoryDay: 20,
+            factoryNight: 25,
+            interchange: 40,
+            laboratory: 35,
+            lighthouse: 40,
+            reserve: 40,
+            shoreline: 45,
+            streets: 50,
+            woods: 40,
+        },
+    },
 
-    // A spawn group is a collection of spawn waves that happen in roughly the same time frame.
-    // The following settings control the timing between spawn groups. Larger numbers will generally result in more time between spawns.
-    "maximum_group_gap_minutes": 8, // At most, how many minutes between spawn groups.
-    "minimum_group_gap_minutes": 4, // At least, how many minutes between spawn groups.
+    botSpawn: {
+        // Adjust regular bot spawn waves, ensuring bots continue to spawn throughout longer raids.
+        // You can leave this enabled with client-side mods that adjust bot spawns; the client-side mod changes
+        // will always take priority.
+        adjustWaves: true,
+
+        // Maximum number of bots that can be alive at once. Reduce if performance issues arise.
+        maximumBots: 28,
+
+        // A wave is defined as a random number of bots that spawn at the same time at the same location.
+        // The following settings control the number of waves that happen at once (per spawn group).
+        wavesPerGroup: {
+            max: 4,
+            min: 1,
+        },
+
+        // A group is a collection of waves that happen in roughly the same time frame (but at different locations).
+        // The following settings control the timing between groups.
+        groupGapMinutes: {
+            max: 8,
+            min: 4,
+        },
+    },
 }
