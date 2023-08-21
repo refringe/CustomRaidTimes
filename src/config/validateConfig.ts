@@ -89,7 +89,9 @@ function isValidCustomTimes(customTimes: CustomTimes): string | null {
     for (const key in customTimes) {
         const value = customTimes[key];
 
-        if (typeof value === 'number') continue;
+        if (typeof value === 'number') {
+            continue;
+        }
 
         if (Array.isArray(value)) {
             for (const override of value) {

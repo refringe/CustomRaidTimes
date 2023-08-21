@@ -32,12 +32,16 @@ class CustomRaidTimes implements IPostDBLoadModAsync, IPreAkiLoadModAsync {
     }
 
     private async initializeIfNeeded(container: DependencyContainer): Promise<boolean> {
-        if (this.config === null) await this.initialize(container);
+        if (this.config === null) {
+            await this.initialize(container);
+        }
         return this.config !== null;
     }
 
     public async preAkiLoadAsync(container: DependencyContainer): Promise<void> {
-        if (!(await this.initializeIfNeeded(container))) return;
+        if (!(await this.initializeIfNeeded(container))) {
+            return;
+        }
 
         const logger = getLogger(container);
 
@@ -49,8 +53,9 @@ class CustomRaidTimes implements IPostDBLoadModAsync, IPreAkiLoadModAsync {
                 {
                     url: '/client/match/offline/end',
                     action: (url, info, sessionId, output) => {
-                        if (this.config!.general.debug)
+                        if (this.config!.general.debug) {
                             logger.log('CustomRaidTimes: CustomRaidTimesMatchEnd route has been triggered.', 'gray');
+                        }
 
                         adjustRaids(container, this.config!);
                         return output;
@@ -62,7 +67,9 @@ class CustomRaidTimes implements IPostDBLoadModAsync, IPreAkiLoadModAsync {
     }
 
     public async postDBLoadAsync(container: DependencyContainer): Promise<void> {
-        if (!(await this.initializeIfNeeded(container))) return;
+        if (!(await this.initializeIfNeeded(container))) {
+            return;
+        }
 
         adjustRaids(container, this.config!);
     }
