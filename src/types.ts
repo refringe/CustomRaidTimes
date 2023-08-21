@@ -36,3 +36,10 @@ export interface BotSpawn {
 export type ExtendedWave = Wave & {
     group: number;
 };
+
+export interface GroupTimeParams {
+    min: number;
+    max: number;
+    offset: number;
+    middle: number;
+}
