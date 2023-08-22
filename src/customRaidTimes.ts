@@ -52,7 +52,7 @@ class CustomRaidTimes implements IPostDBLoadModAsync, IPreAkiLoadModAsync {
         if (this.config === null) {
             return;
         }
-        
+
         adjustRaids(container, this.config!);
     }
 }
