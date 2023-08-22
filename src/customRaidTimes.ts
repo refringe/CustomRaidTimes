@@ -1,51 +1,29 @@
-import type { IPostDBLoadModAsync } from '@spt-aki/models/external/IPostDBLoadModAsync';
-import type { IPreAkiLoadModAsync } from '@spt-aki/models/external/IPreAkiLoadModAsync';
-import type { StaticRouterModService } from '@spt-aki/services/mod/staticRouter/StaticRouterModService';
+import { IPostDBLoadModAsync } from '@spt-aki/models/external/IPostDBLoadModAsync';
+import { IPreAkiLoadModAsync } from '@spt-aki/models/external/IPreAkiLoadModAsync';
+import { StaticRouterModService } from '@spt-aki/services/mod/staticRouter/StaticRouterModService';
 import { DependencyContainer } from 'tsyringe';
-import { loadAndValidateConfig } from './config';
+import { getConfig } from './config';
 import { adjustRaids } from './raids';
-import type { Configuration } from './types';
+import { Configuration } from './types';
 import { getLogger } from './utils/logger';
 
 /**
- * The main class of the CustomRaidTimes mod.
+ * CustomRaidTimes mod.
  */
 class CustomRaidTimes implements IPostDBLoadModAsync, IPreAkiLoadModAsync {
     private config: Configuration | null = null;
 
-    public async initialize(container: DependencyContainer): Promise<void> {
-        try {
-            this.config = await loadAndValidateConfig();
-            if (!this.config.general.enabled) {
-                const logger = getLogger(container);
-                logger.log('CustomRaidTimes is disabled in the config file.', 'red');
-                this.config = null; // Set config to null to indicate the mod is disabled
-            }
-        } catch (error) {
-            const logger = getLogger(container);
-            logger.log(
-                'CustomRaidTimes: An error occurred while loading or validating the configuration file. ' +
-                    error.message,
-                'red'
-            );
-        }
-    }
-
-    private async initializeIfNeeded(container: DependencyContainer): Promise<boolean> {
-        if (this.config === null) {
-            await this.initialize(container);
-        }
-        return this.config !== null;
-    }
-
+    /**
+     * Handle the configuration file, and register any routes.
+     * Runs first!
+     */
     public async preAkiLoadAsync(container: DependencyContainer): Promise<void> {
-        if (!(await this.initializeIfNeeded(container))) {
-            return;
-        }
+        // Make sure that the configuration file has been loaded.
+        this.config = await getConfig(container);
 
         const logger = getLogger(container);
 
-        // Hook into the match end route to recalculate the raid times.
+        // Register a static route for the end of a raid so that the raid times can be adjusted.
         const staticRouterModService = container.resolve<StaticRouterModService>('StaticRouterModService');
         staticRouterModService.registerStaticRouter(
             'CustomRaidTimesMatchEnd',
@@ -66,11 +44,15 @@ class CustomRaidTimes implements IPostDBLoadModAsync, IPreAkiLoadModAsync {
         );
     }
 
+    /**
+     * Adjust the raids on server start, once the database has been loaded.
+     */
     public async postDBLoadAsync(container: DependencyContainer): Promise<void> {
-        if (!(await this.initializeIfNeeded(container))) {
+        // The only way that the configuration is null at this point is if it's failed to load or validate.
+        if (this.config === null) {
             return;
         }
-
+        
         adjustRaids(container, this.config!);
     }
 }

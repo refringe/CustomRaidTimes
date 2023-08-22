@@ -31,12 +31,30 @@ export function adjustTrainTime(location: ILocationData, config: Configuration, 
 function adjustTrainExit(exit: Exit, location: ILocationData, config: Configuration, logger: ILogger): void {
     const raidTimeSec = location.base.EscapeTimeLimit * 60;
     const trainExtractWaitSec = exit.ExfiltrationTime;
-    let trainWaitSec = getRandomTrainWaitTime();
-    let [trainArriveEarliest, trainArriveLatest] = getInitialTrainArrivalTimes(
+    let trainWaitSec: number;
+    let trainArriveEarliest: number;
+    let trainArriveLatest: number;
+
+    // Calculate the earliest and latest arrival times, and the train wait time.
+    trainWaitSec = getRandomTrainWaitTime();
+    [trainArriveEarliest, trainArriveLatest] = getInitialTrainArrivalTimes(
         raidTimeSec,
         trainExtractWaitSec,
         trainWaitSec
     );
+
+    if (!config.trainSchedule.auto) {
+        // Static scheduling will still have the arrival times validated and adjusted but will not be shifted to
+        // earlier into the raid if there's available buffer time.
+        trainArriveEarliest = config.trainSchedule.static.arriveEarliestMinutes * 60;
+        trainArriveLatest = config.trainSchedule.static.arriveLatestMinutes * 60;
+        trainWaitSec = config.trainSchedule.static.trainWaitSeconds;
+
+        const calculatedLatestArrival = getLatestTrainArrivalTime(raidTimeSec, trainExtractWaitSec, trainWaitSec);
+        if (trainArriveLatest > calculatedLatestArrival) {
+            trainArriveLatest = calculatedLatestArrival;
+        }
+    }
 
     // Ensure the earliest arrival time is valid.
     trainArriveEarliest = validateEarliestArrivalTime(trainArriveEarliest);
@@ -44,7 +62,6 @@ function adjustTrainExit(exit: Exit, location: ILocationData, config: Configurat
     // Ensure the latest arrival time is valid.
     if (trainArriveLatest <= 0) {
         [trainArriveEarliest, trainArriveLatest, trainWaitSec] = adjustForLateTrain(
-            trainArriveLatest,
             trainWaitSec,
             raidTimeSec,
             trainExtractWaitSec
@@ -61,8 +78,9 @@ function adjustTrainExit(exit: Exit, location: ILocationData, config: Configurat
         }
     }
 
-    // If there is enough available time, shift the earliest arrival time to 65%-20% of the available time (a minimum of 1 minute).
-    if (trainArriveEarliest > BUFFER_SEC) {
+    // If there is enough available time, shift the earliest arrival time to 65%-20% of the available time (a minimum of
+    // 1 minute). This does not apply to static scheduling.
+    if (config.trainSchedule.auto && trainArriveEarliest > BUFFER_SEC) {
         trainArriveEarliest -= getAdjustmentTime(trainArriveEarliest);
     }
 
@@ -91,7 +109,7 @@ function getInitialTrainArrivalTimes(
     trainExtractWaitSec: number,
     trainWaitSec: number
 ): [number, number] {
-    const latestArrival = raidTimeSec - ANIMATE_SEC - trainExtractWaitSec - trainWaitSec;
+    const latestArrival = getLatestTrainArrivalTime(raidTimeSec, trainExtractWaitSec, trainWaitSec);
     let earliestArrival = latestArrival - ARRIVE_RANDOM_RANGE_SEC;
     if (latestArrival > 0 && earliestArrival < 0) {
         earliestArrival = 0;
@@ -110,15 +128,15 @@ function validateEarliestArrivalTime(trainArriveEarliest: number): number {
 }
 
 /**
- * Lower the latest arrival time until it is no longer too late.
+ * Lower the wait time until the latest arrival time is no longer too late.
  */
 function adjustForLateTrain(
-    trainArriveLatest: number,
     trainWaitSec: number,
     raidTimeSec: number,
     trainExtractWaitSec: number
 ): [number, number, number] {
     const trainArriveEarliest = 0;
+    let trainArriveLatest = 0;
     do {
         trainWaitSec--;
         trainArriveLatest = getLatestTrainArrivalTime(raidTimeSec, trainExtractWaitSec, trainWaitSec);

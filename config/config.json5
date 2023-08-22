@@ -2,7 +2,8 @@
     general: {
         enabled: true,
 
-        // Enables verbose logging for debugging.
+        // Enables verbose logging for debugging. And I mean *verbose*... It will log *everything*; raid times, train 
+        // schedules, and every existing and newly created bot spawn wave in the system.
         debug: false,
     },
 
@@ -41,9 +42,9 @@
     },
 
     botSpawn: {
-        // Adjust regular bot spawn waves, ensuring bots continue to spawn throughout longer raids.
-        // You can leave this enabled with client-side mods that adjust bot spawns; the client-side mod changes
-        // will always take priority.
+        // Adjust regular bot spawn waves, ensuring bots continue to spawn throughout longer raids. If you're unsure if
+        // you should enable this, leave it *enabled*; the mod will automatically disable it at runtime if there are
+        // known conflicts with other mods.
         adjustWaves: true,
 
         // Maximum number of bots that can be alive at once. Reduce if performance issues arise.
@@ -61,6 +62,35 @@
         groupGapMinutes: {
             max: 8,
             min: 4,
+        },
+    },
+
+    trainSchedule: {
+        // Enables the automatic train schedule feature. This automatically generates a schedule for the train that fits
+        // within the raid time, and ensures the train arrives with enough time for players to extract. It's *highly*
+        // recommended to leave this enabled.
+        auto: true,
+
+        static: {
+            // All of the following train schedule options are only used when `auto` is set to `false`.
+            //
+            // WARNING:
+            // - If you don't know what you're doing, don't touch these options. Use the auto schedule feature instead.
+            // - If the sum of the latest arrival time, wait time, train amimation time, and extraction time is greater
+            //   than the resolved raid time, the train will not arrive in time for you to exit the raid.
+            // - ABSOLUTLY NO SUPPORT WILL BE PROVIDED FOR USING THIS FEATURE. YOU ARE ON YOUR OWN. ¯\_(ツ)_/¯
+            //
+            // NOTES:
+            // - Setting `arriveEarliestMinutes` to 20 will have the train arrive (at earliest) 20 minutes into raid.
+            // - Setting `trainWaitSeconds` to 120 will have the train wait 120 seconds after arriving before departing.
+            // - The mod will do it's best to ensure that the latest arrival time lands within the raid time if it's
+            //   been set to a time later than the raid time, but I make no guarantee it will work.
+            // - To have the train arrive at a specific time, every time, set `arriveEarliestMinutes` and
+            //   `arriveLatestMinutes` to the same value.
+            // - The defaults are the same as live; 20, 25, 420.
+            arriveEarliestMinutes: 20,
+            arriveLatestMinutes: 25,
+            trainWaitSeconds: 420,
         },
     },
 }

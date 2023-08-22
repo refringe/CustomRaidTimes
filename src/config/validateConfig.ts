@@ -1,7 +1,15 @@
-import { Configuration, General, RaidTimes, TimeSetting, CustomTimes, BotSpawn } from '../types';
+import { Configuration, General, RaidTimes, TimeSetting, CustomTimes, BotSpawn, TrainSchedule } from '../types';
+
+export function validateConfig(config: Configuration): void {
+    // Validate the configuration and throw an error if invalid.
+    const validationError = runValidate(config);
+    if (validationError) {
+        throw new Error(validationError);
+    }
+}
 
 // Validates the given configuration object and returns an error message if it is invalid.
-export function validateConfig(config: Configuration): string | null {
+function runValidate(config: Configuration): string | null {
     const generalValidation = isValidGeneral(config.general);
     if (generalValidation !== null) {
         return generalValidation;
@@ -15,6 +23,11 @@ export function validateConfig(config: Configuration): string | null {
     const botSpawnValidation = isValidBotSpawn(config.botSpawn);
     if (botSpawnValidation !== null) {
         return botSpawnValidation;
+    }
+
+    const trainScheduleValidation = isValidTrainSchedule(config.trainSchedule);
+    if (trainScheduleValidation !== null) {
+        return trainScheduleValidation;
     }
 
     return null; // No errors
@@ -137,6 +150,25 @@ function isValidBotSpawn(botSpawn: BotSpawn): string | null {
         botSpawn.groupGapMinutes.min > botSpawn.groupGapMinutes.max
     ) {
         return 'The botSpawn setting "groupGapMinutes" should have valid "max" and "min" values with "min" less than or equal to "max".';
+    }
+
+    return null; // No errors
+}
+
+function isValidTrainSchedule(trainSchedule: TrainSchedule): string | null {
+    if (typeof trainSchedule.auto !== 'boolean') {
+        return 'The trainSchedule setting "auto" should be a boolean.';
+    }
+    if (
+        typeof trainSchedule.static !== 'object' ||
+        typeof trainSchedule.static.arriveEarliestMinutes !== 'number' ||
+        typeof trainSchedule.static.arriveLatestMinutes !== 'number' ||
+        typeof trainSchedule.static.trainWaitSeconds !== 'number'
+    ) {
+        return 'The trainSchedule "static" should contain valid numbers for "arriveEarliestMinutes", "arriveLatestMinutes", and "trainWaitSeconds".';
+    }
+    if (trainSchedule.static.arriveEarliestMinutes > trainSchedule.static.arriveLatestMinutes) {
+        return 'The trainSchedule setting "arriveEarliestMinutes" should be less than or equal to "arriveLatestMinutes".';
     }
 
     return null; // No errors

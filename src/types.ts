@@ -4,6 +4,7 @@ export interface Configuration {
     general: General;
     raidTimes: RaidTimes;
     botSpawn: BotSpawn;
+    trainSchedule: TrainSchedule;
 }
 
 export interface General {
@@ -31,6 +32,21 @@ export interface BotSpawn {
     maximumBots: number;
     wavesPerGroup: { max: number; min: number };
     groupGapMinutes: { max: number; min: number };
+}
+
+export interface TrainSchedule {
+    auto: boolean;
+    static: {
+        arriveEarliestMinutes: number;
+        arriveLatestMinutes: number;
+        trainWaitSeconds: number;
+    };
+}
+
+export interface IncompatibleModEntry {
+    mods: string[];
+    config: string;
+    value: boolean;
 }
 
 export type ExtendedWave = Wave & {
