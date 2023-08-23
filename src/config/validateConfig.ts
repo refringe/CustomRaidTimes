@@ -127,6 +127,11 @@ function isValidBotSpawn(botSpawn: BotSpawn): string | null {
         return 'The botSpawn setting "adjustWaves" should be a boolean.';
     }
 
+    // Validate 'force' property
+    if (typeof botSpawn.force !== 'boolean') {
+        return 'The botSpawn setting "force" should be a boolean.';
+    }
+
     // Validate 'maximumBots' property
     if (typeof botSpawn.maximumBots !== 'number' || botSpawn.maximumBots < 0) {
         return 'The botSpawn setting "maximumBots" should be a non-negative number.';

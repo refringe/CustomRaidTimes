@@ -32,6 +32,15 @@ export async function getConfig(container: DependencyContainer): Promise<Configu
         return null;
     }
 
-    // Adjust the configuration file for incompatible mods.
-    return adjustForIncompatibleMods(container, config) as Configuration;
+    // Adjust the configuration file for incompatible mods, unless we're using the 'force'. ;)
+    if (!config.botSpawn.force) {
+        config = adjustForIncompatibleMods(container, config);
+    } else if (config.general.debug) {
+        logger.log(
+            'CustomRaidTimes: Checking for incompatibilities with other mods has been skipped. Ramming speed engaged!',
+            'gray'
+        );
+    }
+
+    return config;
 }

@@ -29,6 +29,7 @@ export interface CustomTimes {
 
 export interface BotSpawn {
     adjustWaves: boolean;
+    force: boolean;
     maximumBots: number;
     wavesPerGroup: { max: number; min: number };
     groupGapMinutes: { max: number; min: number };
