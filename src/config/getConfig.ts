@@ -33,7 +33,5 @@ export async function getConfig(container: DependencyContainer): Promise<Configu
     }
 
     // Adjust the configuration file for incompatible mods.
-    config = adjustForIncompatibleMods(container, config);
-
-    return config;
+    return adjustForIncompatibleMods(container, config) as Configuration;
 }

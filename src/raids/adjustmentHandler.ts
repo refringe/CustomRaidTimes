@@ -32,7 +32,9 @@ export function adjustRaids(container: DependencyContainer, config: Configuratio
         if (locationData) {
             adjustRaidTime(locationData, config, logger);
             adjustTrainTime(locationData, config, logger);
-            adjustSpawnWaves(locationData, config, logger);
+            if (config.botSpawn.adjustWaves) {
+                adjustSpawnWaves(locationData, config, logger);
+            }
         } else {
             logger.log(`CustomRaidTimes: Location '${location}' not found. Skipping adjustment.`, 'red');
         }
