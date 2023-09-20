@@ -1,8 +1,8 @@
-import type { Exit } from '@spt-aki/models/eft/common/ILocationBase';
-import type { ILocationData } from '@spt-aki/models/spt/server/ILocations';
-import type { ILogger } from '@spt-aki/models/spt/utils/ILogger';
-import type { Configuration } from '../types';
-import { getHumanLocationName } from '../utils/locations';
+import type { Exit } from "@spt-aki/models/eft/common/ILocationBase";
+import type { ILocationData } from "@spt-aki/models/spt/server/ILocations";
+import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import type { Configuration } from "../types";
+import { getHumanLocationName } from "../utils/locations";
 
 const ANIMATE_SEC = 97;
 const MIN_WAIT_SEC = 60;
@@ -19,7 +19,7 @@ const BUFFER_ADJUSTMENT_MIN_PERCENT = 0.2;
  */
 export function adjustTrainTime(location: ILocationData, config: Configuration, logger: ILogger): void {
     location.base.exits.forEach(exit => {
-        if (exit.PassageRequirement?.toLowerCase() === 'train') {
+        if (exit.PassageRequirement?.toLowerCase() === "train") {
             adjustTrainExit(exit, location, config, logger);
         }
     });
@@ -73,7 +73,7 @@ function adjustTrainExit(exit: Exit, location: ILocationData, config: Configurat
                 `CustomRaidTimes: ${getHumanLocationName(
                     location.base.Id
                 )} Train Schedule - Train cannot depart before the end of the raid. Raid time is too short.`,
-                'yellow'
+                "yellow"
             );
         }
     }
@@ -96,7 +96,7 @@ function adjustTrainExit(exit: Exit, location: ILocationData, config: Configurat
             ).toFixed(2)} minutes, Latest: ${(trainArriveLatest / 60).toFixed(2)} minutes, Wait: ${(
                 trainWaitSec / 60
             ).toFixed(2)} minutes.`,
-            'gray'
+            "gray"
         );
     }
 }

@@ -1,8 +1,8 @@
-import { I18n } from "i18n";
-import { ILocaleConfig } from "../models/spt/config/ILocaleConfig";
-import { ILogger } from "../models/spt/utils/ILogger";
-import { DatabaseServer } from "../servers/DatabaseServer";
-import { LocaleService } from "./LocaleService";
+import { I18n } from 'i18n';
+import { ILocaleConfig } from '../models/spt/config/ILocaleConfig';
+import { ILogger } from '../models/spt/utils/ILogger';
+import { DatabaseServer } from '../servers/DatabaseServer';
+import { LocaleService } from './LocaleService';
 /**
  * Handles translating server text into different langauges
  */
@@ -25,4 +25,10 @@ export declare class LocalisationService {
      * @returns string array of keys
      */
     getKeys(): string[];
+    /**
+     * From the provided partial key, find all keys that start with text and choose a random match
+     * @param partialKey Key to match locale keys on
+     * @returns locale text
+     */
+    getRandomTextThatMatchesPartialKey(partialKey: string): string;
 }

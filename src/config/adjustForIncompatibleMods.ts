@@ -1,14 +1,14 @@
-import { PreAkiModLoader } from '@spt-aki/loaders/PreAkiModLoader';
-import { DependencyContainer } from 'tsyringe';
-import type { Configuration, IncompatibleModEntry } from '../types';
-import { set } from '../utils/array';
-import { getLogger } from '../utils/logger';
+import { PreAkiModLoader } from "@spt-aki/loaders/PreAkiModLoader";
+import { DependencyContainer } from "tsyringe";
+import type { Configuration, IncompatibleModEntry } from "../types";
+import { set } from "../utils/array";
+import { getLogger } from "../utils/logger";
 
 // Definition of incompatible mods and corresponding adjustments.
 const incompatibleMods: IncompatibleModEntry[] = [
     {
-        mods: ['SWAG', 'MOAR', 'BetterSpawnsPlus', 'POOP'],
-        config: 'botSpawn.adjustWaves',
+        mods: ["SWAG", "MOAR", "BetterSpawnsPlus", "POOP"],
+        config: "botSpawn.adjustWaves",
         value: false,
     },
 ];
@@ -27,8 +27,8 @@ export function adjustForIncompatibleMods(container: DependencyContainer, config
 
     if (config.general.debug) {
         logger.log(
-            `CustomRaidTimes: Detected the following installed mods: ${Array.from(installedMods).join(', ')}`,
-            'gray'
+            `CustomRaidTimes: Detected the following installed mods: ${Array.from(installedMods).join(", ")}`,
+            "gray"
         );
     }
 
@@ -49,9 +49,9 @@ export function adjustForIncompatibleMods(container: DependencyContainer, config
         if (matchedIncompatibles.length > 0) {
             logger.log(
                 `CustomRaidTimes: Incompatible mods are installed: ${matchedIncompatibles.join(
-                    ', '
+                    ", "
                 )}. Forcing configuration option ${incompatibility.config} to ${incompatibility.value}.`,
-                'yellow'
+                "yellow"
             );
 
             set(config, incompatibility.config, incompatibility.value);
@@ -91,6 +91,6 @@ function getIncompatibleMods(loadedMods: Set<string>): Set<string> {
  * Get a list of all installed mods. Should also include this mod.
  */
 function getInstalledMods(container: DependencyContainer): Set<string> {
-    const preAkiModLoader = container.resolve<PreAkiModLoader>('PreAkiModLoader');
+    const preAkiModLoader = container.resolve<PreAkiModLoader>("PreAkiModLoader");
     return new Set(preAkiModLoader.getImportedModsNames());
 }

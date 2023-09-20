@@ -1,8 +1,8 @@
-import type { Configuration } from '../types';
-import type { ILocationData } from '@spt-aki/models/spt/server/ILocations';
-import type { ILogger } from '@spt-aki/models/spt/utils/ILogger';
-import { getHumanLocationName, getConfigLocationName } from '../utils/locations';
-import { resolveTimeSettings } from '../utils/times';
+import type { Configuration } from "../types";
+import type { ILocationData } from "@spt-aki/models/spt/server/ILocations";
+import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import { getHumanLocationName, getConfigLocationName } from "../utils/locations";
+import { resolveTimeSettings } from "../utils/times";
 
 export function adjustRaidTime(location: ILocationData, config: Configuration, logger: ILogger): void {
     // Get the human-readable location name
@@ -22,6 +22,6 @@ export function adjustRaidTime(location: ILocationData, config: Configuration, l
     location.base.EscapeTimeLimit = newRaidTime;
 
     if (config.general.debug) {
-        logger.log(`CustomRaidTimes: ${humanLocationName} raid time set to ${newRaidTime} minutes.`, 'gray');
+        logger.log(`CustomRaidTimes: ${humanLocationName} raid time set to ${newRaidTime} minutes.`, "gray");
     }
 }

@@ -1,9 +1,9 @@
-import type { Wave } from '@spt-aki/models/eft/common/ILocationBase';
-import type { ILocationData } from '@spt-aki/models/spt/server/ILocations';
-import type { ILogger } from '@spt-aki/models/spt/utils/ILogger';
-import type { Configuration, ExtendedWave, GroupTimeParams } from '../types';
-import { getRandomElement } from '../utils/array';
-import { getHumanLocationName, getSpawnZones } from '../utils/locations';
+import type { Wave } from "@spt-aki/models/eft/common/ILocationBase";
+import type { ILocationData } from "@spt-aki/models/spt/server/ILocations";
+import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import type { Configuration, ExtendedWave, GroupTimeParams } from "../types";
+import { getRandomElement } from "../utils/array";
+import { getHumanLocationName, getSpawnZones } from "../utils/locations";
 
 /**
  * Orchestrates the entire process of adjusting spawn waves by calling other smaller, more focused functions.
@@ -18,7 +18,7 @@ export function adjustSpawnWaves(location: ILocationData, config: Configuration,
     );
     location.base.OpenZones = getSpawnZones(location.base.Id, true);
 
-    if (location.base.Id === 'laboratory') {
+    if (location.base.Id === "laboratory") {
         handleLaboratoryLocation(config, logger);
         return;
     }
@@ -34,7 +34,7 @@ export function adjustSpawnWaves(location: ILocationData, config: Configuration,
         initializeWave(wave, waveNumber, location.base.Id, groupTimeParams.max);
         adjustWaveTimings(wave, groupTimeParams);
         assignWaveGroups(wave, groupsNeeded, groupTimeParams, largestGroup);
-        logWaveInfo(wave, 'CustomRaidTimes:   -> Existing Wave', config, logger);
+        logWaveInfo(wave, "CustomRaidTimes:   -> Existing Wave", config, logger);
         waveNumber++;
     }
 
@@ -66,7 +66,7 @@ function calculateGroupTimeParameters(min: number, max: number): GroupTimeParams
  */
 function handleLaboratoryLocation(config: Configuration, logger: ILogger): void {
     if (config.general.debug) {
-        logger.log('CustomRaidTimes: Laboratory spawn waves are currently not adjusted.', 'gray');
+        logger.log("CustomRaidTimes: Laboratory spawn waves are currently not adjusted.", "gray");
     }
 }
 
@@ -84,7 +84,7 @@ function logExistingWaveCount(
             `CustomRaidTimes: There are currently ${existingWavesCount} spawn waves on ${getHumanLocationName(
                 location.base.Id
             )}.`,
-            'gray'
+            "gray"
         );
     }
 }
@@ -104,7 +104,7 @@ function logGroupsNeededInfo(groupsNeeded: number, config: Configuration, logger
     if (config.general.debug) {
         logger.log(
             `CustomRaidTimes:  -> To fill the raid, ${groupsNeeded} additional spawn groups are needed.`,
-            'gray'
+            "gray"
         );
     }
 }
@@ -117,7 +117,7 @@ function initializeWave(wave: ExtendedWave, waveNumber: number, locationId: stri
     wave.group = 1;
     wave.number = waveNumber;
 
-    if (wave.SpawnPoints === '') {
+    if (wave.SpawnPoints === "") {
         wave.SpawnPoints = selectRandomSpawnPoint(locationId);
     }
 
@@ -167,7 +167,7 @@ function assignWaveGroups(
  */
 function logLargestGroupInfo(largestGroup: number, config: Configuration, logger: ILogger): void {
     if (config.general.debug) {
-        logger.log(`CustomRaidTimes:  -> Largest Group: ${largestGroup}`, 'gray');
+        logger.log(`CustomRaidTimes:  -> Largest Group: ${largestGroup}`, "gray");
     }
 }
 
@@ -177,7 +177,7 @@ function logLargestGroupInfo(largestGroup: number, config: Configuration, logger
  * the array of missing group numbers.
  */
 function getMissingGroups(groupsNeeded: number, waves: Wave[], config: Configuration, logger: ILogger): number[] {
-    let missingGroupsDebug = 'CustomRaidTimes:  -> Missing Groups: ';
+    let missingGroupsDebug = "CustomRaidTimes:  -> Missing Groups: ";
     const missingGroups = [...Array(groupsNeeded + 1).keys()].slice(1);
 
     for (const originalWave of waves) {
@@ -194,8 +194,8 @@ function getMissingGroups(groupsNeeded: number, waves: Wave[], config: Configura
 
     if (config.general.debug) {
         logger.log(
-            missingGroupsDebug.substring(0, missingGroupsDebug.length - 2) + ' (' + missingGroups.length + ' total)',
-            'gray'
+            missingGroupsDebug.substring(0, missingGroupsDebug.length - 2) + " (" + missingGroups.length + " total)",
+            "gray"
         );
     }
 
@@ -257,7 +257,7 @@ function generateNewWaveGroup(
     // Tack it on the end.
     waves.push(newWave);
 
-    logWaveInfo(newWave, 'CustomRaidTimes:   -> New Wave', config, logger);
+    logWaveInfo(newWave, "CustomRaidTimes:   -> New Wave", config, logger);
 }
 
 /**
@@ -281,7 +281,7 @@ function generateWaveTimes(
  */
 function selectRandomSpawnPoint(locationName: string, sniper: boolean = true): string {
     const spawnZones = getSpawnZones(locationName, sniper);
-    return getRandomElement(spawnZones.split(','));
+    return getRandomElement(spawnZones.split(","));
 }
 
 /**
@@ -292,7 +292,7 @@ function logWaveInfo(wave: ExtendedWave, prefixMessage: string, config: Configur
     if (config.general.debug) {
         logger.log(
             `${prefixMessage} - Group: ${wave.group}, Number: ${wave.number}, Time: ${wave.time_min}-${wave.time_max}, Slots: ${wave.slots_min}-${wave.slots_max}, Zone: ${wave.SpawnPoints}, Type: ${wave.WildSpawnType}`,
-            'gray'
+            "gray"
         );
     }
 }

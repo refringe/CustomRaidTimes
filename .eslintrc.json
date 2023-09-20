@@ -1,92 +1,96 @@
 {
-  "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": [
-      "@typescript-eslint",
-      "prettier"
-  ],
-  "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/eslint-recommended",
-      "plugin:@typescript-eslint/recommended",
-      "prettier"
-  ],
-  "rules": {
-      "prettier/prettier": "error",
-      "curly": "error",
-      "@typescript-eslint/no-explicit-any": 0,
-      "@typescript-eslint/no-unused-vars": 1,
-      "@typescript-eslint/no-empty-interface": 0,
-      "@typescript-eslint/no-namespace": 0,
-      "@typescript-eslint/naming-convention": [
-          "warn",
-          {
-              "selector": "default",
-              "format": [
-                  "camelCase"
-              ],
-              "leadingUnderscore": "allow"
-          },
-          {
-              "selector": "variable",
-              "format": [
-                  "camelCase",
-                  "UPPER_CASE"
-              ],
-              "leadingUnderscore": "allow"
-          },
-          {
-              "selector": "typeLike",
-              "format": [
-                  "PascalCase"
-              ]
-          },
-          {
-              "selector": "objectLiteralProperty",
-              "format": [
-                  "PascalCase",
-                  "camelCase"
-              ],
-              "leadingUnderscore": "allow"
-          },
-          {
-              "selector": "typeProperty",
-              "format": [
-                  "PascalCase",
-                  "camelCase"
-              ],
-              "leadingUnderscore": "allow"
-          },
-          {
-              "selector": "enumMember",
-              "format": [
-                  "UPPER_CASE"
-              ]
-          }
-      ],
-      "@typescript-eslint/no-unused-expressions": [
-          "warn",
-          {
-              "allowShortCircuit": false,
-              "allowTernary": false
-          }
-      ],
-      "@typescript-eslint/explicit-module-boundary-types": [
-          "warn",
-          {
-              "allowArgumentsExplicitlyTypedAsAny": true
-          }
-      ]
-  },
-  "overrides": [
-      {
-          "files": [
-              "*.mjs",
-              "*.ts"
-          ],
-          "env": {
-              "node": true
-          }
-      }
-  ]
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint",
+        "prettier"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier"
+    ],
+    "rules": {
+        "prettier/prettier": "error",
+        "@typescript-eslint/no-explicit-any": 0,
+        "@typescript-eslint/no-unused-vars": 1,
+        "@typescript-eslint/no-empty-interface": 0,
+        "@typescript-eslint/no-namespace": 0,
+        "@typescript-eslint/naming-convention": [
+            "warn",
+            {
+                "selector": "property",
+                "modifiers": ["readonly", "static"],
+                "format": ["UPPER_CASE"]
+            },
+            {
+                "selector": "default",
+                "format": [
+                    "camelCase"
+                ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "variable",
+                "format": [
+                    "camelCase",
+                    "UPPER_CASE"
+                ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "typeLike",
+                "format": [
+                    "PascalCase"
+                ]
+            },
+            {
+                "selector": "objectLiteralProperty",
+                "format": [
+                    "PascalCase",
+                    "camelCase"
+                ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "typeProperty",
+                "format": [
+                    "PascalCase",
+                    "camelCase"
+                ],
+                "leadingUnderscore": "allow"
+            },
+            {
+                "selector": "enumMember",
+                "format": [
+                    "UPPER_CASE"
+                ]
+            }
+        ],
+        "@typescript-eslint/no-unused-expressions": [
+            "warn",
+            {
+                "allowShortCircuit": false,
+                "allowTernary": false
+            }
+        ],
+        "@typescript-eslint/explicit-module-boundary-types": [
+            "warn",
+            {
+                "allowArgumentsExplicitlyTypedAsAny": true
+            }
+        ]
+    },
+    "overrides": [
+        {
+            "files": [
+                "*.mjs",
+                "*.ts"
+            ],
+            "env": {
+                "node": true
+            }
+        }
+    ]
 }

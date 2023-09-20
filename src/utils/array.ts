@@ -3,7 +3,7 @@ export function getRandomElement<T>(array: T[]): T {
 }
 
 export function set(obj: any, path: string, value: any): void {
-    const parts = path.split('.');
+    const parts = path.split(".");
     let current = obj;
 
     for (let i = 0; i < parts.length - 1; i++) {

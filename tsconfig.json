@@ -9,6 +9,7 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "resolveJsonModule": true,
+        "strictNullChecks": false,
         "outDir": "tmp",
         "baseUrl": ".",
         "paths": {
