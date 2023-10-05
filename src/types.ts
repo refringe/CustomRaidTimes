@@ -1,4 +1,4 @@
-import type { Wave } from '@spt-aki/models/eft/common/ILocationBase';
+import type { Wave } from "@spt-aki/models/eft/common/ILocationBase";
 
 export interface Configuration {
     general: General;
@@ -14,7 +14,7 @@ export interface General {
 
 export interface RaidTimes {
     overrideAll: boolean;
-    override: TimeSetting[];
+    override: number | TimeSetting[];
     customTimes: CustomTimes;
 }
 

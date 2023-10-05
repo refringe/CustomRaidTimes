@@ -1,25 +1,35 @@
-import { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
-import { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
-import { StaticRouterModService } from "@spt-aki/services/mod/staticRouter/StaticRouterModService";
+import type { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
+import type { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod";
+import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import type { StaticRouterModService } from "@spt-aki/services/mod/staticRouter/StaticRouterModService";
 import { DependencyContainer } from "tsyringe";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { adjustRaids } from "./raids";
+import { LocationProcessor } from "./processors/LocationProcessor";
+import { RaidTimeProcessor } from "./processors/RaidTimeProcessor";
 import { ConfigServer } from "./servers/ConfigServer";
-import { Configuration } from "./types";
+import type { Configuration, IncompatibleModEntry } from "./types";
 
 /**
  * CustomRaidTimes mod.
  */
-class CustomRaidTimes implements IPostDBLoadMod, IPreAkiLoadMod {
+export class CustomRaidTimes implements IPostDBLoadMod, IPreAkiLoadMod {
     public static container: DependencyContainer;
     public static logger: ILogger;
     public static config: Configuration | null = null;
+
+    // Definition of incompatible mods and corresponding adjustments.
+    public static conflicts: IncompatibleModEntry[] = [
+        {
+            mods: ["SWAG", "MOAR", "BetterSpawnsPlus"],
+            config: "botSpawn.adjustWaves",
+            value: false,
+        },
+    ];
 
     /**
      * Handle loading the configuration file and registering our custom CustomRaidTimesMatchEnd route.
      * Runs before the database is loaded.
      */
-    public async preAkiLoad(container: DependencyContainer): Promise<void> {
+    public preAkiLoad(container: DependencyContainer): void {
         CustomRaidTimes.container = container;
 
         // Resolve the logger and save it to the static logger property for simple access.
@@ -27,7 +37,7 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreAkiLoadMod {
 
         // Load and validate the configuration file, saving it to the static config property for simple access.
         try {
-            CustomRaidTimes.config = new ConfigServer().loadConfig().validateConfig().getConfig();
+            CustomRaidTimes.config = new ConfigServer().loadConfig().validateConfig().adjustConflicts().getConfig();
         } catch (error: any) {
             CustomRaidTimes.config = null; // Set the config to null so we know it's failed to load or validate.
             CustomRaidTimes.logger.log(`CustomRaidTimes: ${error.message}`, "red");
@@ -61,7 +71,8 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreAkiLoadMod {
                             );
                         }
 
-                        adjustRaids(container, CustomRaidTimes.config!);
+                        this.initializer();
+
                         return output;
                     },
                 },
@@ -73,15 +84,25 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreAkiLoadMod {
     /**
      * Adjust the raids on server start, once the database has been loaded.
      */
-    public async postDBLoad(container: DependencyContainer): Promise<void> {
+    public postDBLoad(container: DependencyContainer): void {
         // If the configuration is null at this point we can stop here. This will happen if the configuration file
         // failed to load, failed to validate, or if the mod is disabled in the configuration file.
         if (CustomRaidTimes.config === null) {
             return;
         }
 
-        // Modify the raids.
-        new AdjustRaidTimes();
+        this.initializer();
+    }
+
+    private initializer(): void {
+        // Process the raid time configuration options and return the calculated times. This will be run after database
+        // load, and after every raid.
+        CustomRaidTimes.config.raidTimes = new RaidTimeProcessor(CustomRaidTimes.config.raidTimes)
+            .processTimes()
+            .getTimes();
+
+        // Engage!
+        new LocationProcessor().processLocations();
     }
 }
 
