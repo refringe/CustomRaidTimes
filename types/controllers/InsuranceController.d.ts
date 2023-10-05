@@ -7,6 +7,7 @@ import { IGetInsuranceCostRequestData } from "../models/eft/insurance/IGetInsura
 import { IGetInsuranceCostResponseData } from "../models/eft/insurance/IGetInsuranceCostResponseData";
 import { IInsureRequestData } from "../models/eft/insurance/IInsureRequestData";
 import { IItemEventRouterResponse } from "../models/eft/itemEvent/IItemEventRouterResponse";
+import { Insurance } from "../models/eft/profile/IAkiProfile";
 import { IInsuranceConfig } from "../models/spt/config/IInsuranceConfig";
 import { ILogger } from "../models/spt/utils/ILogger";
 import { EventOutputHolder } from "../routers/EventOutputHolder";
@@ -37,6 +38,11 @@ export declare class InsuranceController {
      */
     processReturn(): void;
     /**
+     * Change SlotId of children inside Containers to be a root item
+     * @param insured Insured Items
+     */
+    protected updateSlotIdOfContainersChildren(insured: Insurance): void;
+    /**
      * Should the passed in item be removed from player inventory
      * @param insuredItem Insurued item to roll to lose
      * @param traderId Trader the item was insured by
@@ -56,9 +62,9 @@ export declare class InsuranceController {
     /**
      * Handle client/insurance/items/list/cost
      * Calculate insurance cost
-     * @param info request object
+     * @param request request object
      * @param sessionID session id
      * @returns IGetInsuranceCostResponseData object to send to client
      */
-    cost(info: IGetInsuranceCostRequestData, sessionID: string): IGetInsuranceCostResponseData;
+    cost(request: IGetInsuranceCostRequestData, sessionID: string): IGetInsuranceCostResponseData;
 }

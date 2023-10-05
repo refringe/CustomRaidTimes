@@ -1,3 +1,4 @@
+import { DialogueHelper } from "../helpers/DialogueHelper";
 import { ItemHelper } from "../helpers/ItemHelper";
 import { NotificationSendHelper } from "../helpers/NotificationSendHelper";
 import { NotifierHelper } from "../helpers/NotifierHelper";
@@ -19,11 +20,12 @@ export declare class MailSendService {
     protected saveServer: SaveServer;
     protected databaseServer: DatabaseServer;
     protected notifierHelper: NotifierHelper;
+    protected dialogueHelper: DialogueHelper;
     protected notificationSendHelper: NotificationSendHelper;
     protected localisationService: LocalisationService;
     protected itemHelper: ItemHelper;
     protected readonly systemSenderId = "59e7125688a45068a6249071";
-    constructor(logger: ILogger, hashUtil: HashUtil, timeUtil: TimeUtil, saveServer: SaveServer, databaseServer: DatabaseServer, notifierHelper: NotifierHelper, notificationSendHelper: NotificationSendHelper, localisationService: LocalisationService, itemHelper: ItemHelper);
+    constructor(logger: ILogger, hashUtil: HashUtil, timeUtil: TimeUtil, saveServer: SaveServer, databaseServer: DatabaseServer, notifierHelper: NotifierHelper, dialogueHelper: DialogueHelper, notificationSendHelper: NotificationSendHelper, localisationService: LocalisationService, itemHelper: ItemHelper);
     /**
      * Send a message from an NPC (e.g. prapor) to the player with or without items using direct message text, do not look up any locale
      * @param playerId Players id to send message to
@@ -43,7 +45,7 @@ export declare class MailSendService {
      * @param items Optional items to send to player
      * @param maxStorageTimeSeconds Optional time to collect items before they expire
      */
-    sendLocalisedNpcMessageToPlayer(playerId: string, sender: Traders, messageType: MessageType, messageLocaleId: string, items?: Item[], maxStorageTimeSeconds?: any): void;
+    sendLocalisedNpcMessageToPlayer(playerId: string, sender: Traders, messageType: MessageType, messageLocaleId: string, items?: Item[], maxStorageTimeSeconds?: any, systemData?: any): void;
     /**
      * Send a message from SYSTEM to the player with or without items
      * @param playerId Players id to send message to
@@ -52,6 +54,14 @@ export declare class MailSendService {
      * @param maxStorageTimeSeconds Optional time to collect items before they expire
      */
     sendSystemMessageToPlayer(playerId: string, message: string, items?: Item[], maxStorageTimeSeconds?: any): void;
+    /**
+     * Send a message from SYSTEM to the player with or without items with loalised text
+     * @param playerId Players id to send message to
+     * @param messageLocaleId Id of key from locale file to send to player
+     * @param items Optional items to send to player
+     * @param maxStorageTimeSeconds Optional time to collect items before they expire
+     */
+    sendLocalisedSystemMessageToPlayer(playerId: string, messageLocaleId: string, items?: Item[], maxStorageTimeSeconds?: any): void;
     /**
      * Send a USER message to a player with or without items
      * @param playerId Players id to send message to

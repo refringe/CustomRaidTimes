@@ -1,6 +1,7 @@
 import { HideoutHelper } from "../helpers/HideoutHelper";
 import { InventoryHelper } from "../helpers/InventoryHelper";
 import { ItemHelper } from "../helpers/ItemHelper";
+import { TraderHelper } from "../helpers/TraderHelper";
 import { IPmcData } from "../models/eft/common/IPmcData";
 import { Bonus, HideoutSlot } from "../models/eft/common/tables/IBotBase";
 import { IPmcDataRepeatableQuest, IRepeatableQuest } from "../models/eft/common/tables/IRepeatableQuests";
@@ -20,6 +21,7 @@ export declare class ProfileFixerService {
     protected watermark: Watermark;
     protected hideoutHelper: HideoutHelper;
     protected inventoryHelper: InventoryHelper;
+    protected traderHelper: TraderHelper;
     protected itemHelper: ItemHelper;
     protected localisationService: LocalisationService;
     protected timeUtil: TimeUtil;
@@ -27,12 +29,15 @@ export declare class ProfileFixerService {
     protected configServer: ConfigServer;
     protected coreConfig: ICoreConfig;
     protected ragfairConfig: IRagfairConfig;
-    constructor(logger: ILogger, watermark: Watermark, hideoutHelper: HideoutHelper, inventoryHelper: InventoryHelper, itemHelper: ItemHelper, localisationService: LocalisationService, timeUtil: TimeUtil, databaseServer: DatabaseServer, configServer: ConfigServer);
+    constructor(logger: ILogger, watermark: Watermark, hideoutHelper: HideoutHelper, inventoryHelper: InventoryHelper, traderHelper: TraderHelper, itemHelper: ItemHelper, localisationService: LocalisationService, timeUtil: TimeUtil, databaseServer: DatabaseServer, configServer: ConfigServer);
     /**
      * Find issues in the pmc profile data that may cause issues and fix them
      * @param pmcProfile profile to check and fix
      */
     checkForAndFixPmcProfileIssues(pmcProfile: IPmcData): void;
+    protected addMissingGunStandContainerImprovements(pmcProfile: IPmcData): void;
+    protected addHideoutAreaStashes(pmcProfile: IPmcData): void;
+    protected addMissingHideoutWallAreas(pmcProfile: IPmcData): void;
     protected adjustUnreasonableModFleaPrices(): void;
     /**
      * Add tag to profile to indicate when it was made
@@ -59,7 +64,6 @@ export declare class ProfileFixerService {
      */
     protected updateProfileQuestDataValues(pmcProfile: IPmcData): void;
     protected addMissingRepeatableQuestsProperty(pmcProfile: IPmcData): void;
-    protected addMissingWorkbenchWeaponSkills(pmcProfile: IPmcData): void;
     /**
      * Some profiles have hideout maxed and therefore no improvements
      * @param pmcProfile Profile to add improvement data to
@@ -87,7 +91,6 @@ export declare class ProfileFixerService {
      * @param pmcProfile
      */
     protected updateProfilePocketsToNewId(pmcProfile: IPmcData): void;
-    addMissingArmorRepairSkill(pmcProfile: IPmcData): void;
     /**
      * Iterate over players hideout areas and find what's build, look for missing bonuses those areas give and add them if missing
      * @param pmcProfile Profile to update
@@ -105,7 +108,7 @@ export declare class ProfileFixerService {
      * @param sessionId Session id
      * @param pmcProfile Profile to check inventory of
      */
-    checkForOrphanedModdedItems(sessionId: string, pmcProfile: IPmcData): void;
+    checkForOrphanedModdedItems(sessionId: string, fullProfile: IAkiProfile): void;
     /**
      * Add `Improvements` object to hideout if missing - added in eft 13.0.21469
      * @param pmcProfile profile to update
@@ -121,4 +124,9 @@ export declare class ProfileFixerService {
      * @param pmcProfile Profile to update
      */
     removeLegacyScavCaseProductionCrafts(pmcProfile: IPmcData): void;
+    /**
+     * 26126 (7th August) requires bonuses to have an ID, these were not included in the default profile presets
+     * @param pmcProfile Profile to add missing IDs to
+     */
+    addMissingIdsToBonuses(pmcProfile: IPmcData): void;
 }

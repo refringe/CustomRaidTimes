@@ -6,7 +6,9 @@ import { Item, Upd } from "./IItem";
 import { IPmcDataRepeatableQuest } from "./IRepeatableQuests";
 export interface IBotBase {
     _id: string;
-    aid: string;
+    aid: number;
+    /** SPT property - use to store player id - TODO - move to AID ( account id as guid of choice) */
+    sessionId: string;
     savage?: string;
     Info: Info;
     Customization: Customization;
@@ -121,6 +123,8 @@ export interface Inventory {
     sortingTable: string;
     questRaidItems: string;
     questStashItems: string;
+    /** Key is hideout area enum numeric as string e.g. "24", value is area _id  */
+    hideoutAreaStashes: Record<string, string>;
     fastPanel: Record<string, string>;
 }
 export interface IBaseJsonSkills {
@@ -146,6 +150,9 @@ export interface Common extends IBaseSkill {
 export interface Mastering extends IBaseSkill {
 }
 export interface Stats {
+    Eft: IEftStats;
+}
+export interface IEftStats {
     CarriedQuestItems: string[];
     Victims: Victim[];
     TotalSessionExperience: number;
@@ -267,6 +274,7 @@ export interface BackendCounter {
     value: number;
 }
 export interface InsuredItem {
+    /** Trader Id item was insured by */
     tid: string;
     itemId: string;
 }
@@ -291,6 +299,12 @@ export interface Productive {
     SkipTime?: number;
     /** Seconds needed to fully craft */
     ProductionTime?: number;
+    GivenItemsInStart?: string[];
+    Interrupted?: boolean;
+    /** Used in hideout prodiction.json */
+    needFuelForAllProductionTime?: boolean;
+    /** Used when sending data to client */
+    NeedFuelForAllProductionTime?: boolean;
     sptIsScavCase?: boolean;
 }
 export interface Production extends Productive {
@@ -353,10 +367,18 @@ export interface Quest {
 export interface TraderInfo {
     loyaltyLevel: number;
     salesSum: number;
-    disabled: boolean;
     standing: number;
     nextResupply: number;
     unlocked: boolean;
+    disabled: boolean;
+}
+/** This object is sent to the client as part of traderRelations */
+export interface TraderData {
+    salesSum: number;
+    standing: number;
+    loyalty: number;
+    unlocked: boolean;
+    disabled: boolean;
 }
 export interface RagfairInfo {
     rating: number;

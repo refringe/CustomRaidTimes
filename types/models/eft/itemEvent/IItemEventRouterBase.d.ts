@@ -1,5 +1,6 @@
+import { EquipmentBuildType } from "../../../models/enums/EquipmentBuildType";
 import { QuestStatus } from "../../../models/enums/QuestStatus";
-import { Health, Productive, Skills, TraderInfo } from "../common/tables/IBotBase";
+import { Health, Productive, Skills, TraderData } from "../common/tables/IBotBase";
 import { Item, Upd } from "../common/tables/IItem";
 import { IQuest } from "../common/tables/IQuest";
 import { IPmcDataRepeatableQuest } from "../common/tables/IRepeatableQuests";
@@ -20,17 +21,23 @@ export interface ProfileChange {
     experience: number;
     quests: IQuest[];
     ragFairOffers: IRagfairOffer[];
-    builds: BuildChange[];
+    weaponBuilds: IWeaponBuildChange[];
+    equipmentBuilds: IEquipmentBuildChange[];
     items: ItemChanges;
     production: Record<string, Productive>;
     /** Hideout area improvement id */
     improvements: Record<string, Improvement>;
     skills: Skills;
     health: Health;
-    traderRelations: Record<string, TraderInfo>;
+    traderRelations: Record<string, TraderData>;
     repeatableQuests?: IPmcDataRepeatableQuest[];
     recipeUnlocked: Record<string, boolean>;
+    changedHideoutStashes?: Record<string, IHideoutStashItem>;
     questsStatus: QuestStatusChange[];
+}
+export interface IHideoutStashItem {
+    Id: string;
+    Tpl: string;
 }
 export interface QuestStatusChange {
     qid: string;
@@ -40,11 +47,20 @@ export interface QuestStatusChange {
     completedConditions: string[];
     availableAfter: number;
 }
-export interface BuildChange {
+export interface IWeaponBuildChange {
     id: string;
     name: string;
     root: string;
     items: Item[];
+}
+export interface IEquipmentBuildChange {
+    id: string;
+    name: string;
+    root: string;
+    items: Item[];
+    type: string;
+    fastpanel: any[];
+    buildType: EquipmentBuildType;
 }
 export interface ItemChanges {
     new: Product[];
