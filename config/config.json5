@@ -13,12 +13,16 @@
 
         // Override raid times options. Used for all maps, but only when the above `override_all` is set to `true`.
         //
-        // These are examples of how to use the various options; only a single minutes and weight object is required.
-        // If more than one option is provided, the weights are used to determine how often each object is used. The
-        // higher the weight, the more often it is used relative to the others.
+        // These are examples of how to use the various options. If more than one option is provided, the weights are
+        // used to determine how often each object is used. The higher the weight, the more often it is used relative to
+        // the others.
         //
         // The minutes and weight options can be a single number, or an object with min and max values which will be
         // used to generate a random number between the two.
+        //
+        // You can also use a single number for the override option, which will be used for all locations, all the time:
+        // override: 300, // Five hour raids
+        //
         override: [
             { minutes: 60, weight: 10 }, // 60 minute raid, used 10 times more often than a weight of 1.
             { minutes: 30, weight: { min: 2, max: 5 } }, // 30 minute raid, used 2-5 times more often than a weight of 1.
