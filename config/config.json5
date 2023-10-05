@@ -4,7 +4,7 @@
 
         // Enables verbose logging for debugging. And I mean *verbose*... It will log *everything*; raid times, train
         // schedules, and every existing and newly created bot spawn wave in the system.
-        debug: true,
+        debug: false,
     },
 
     raidTimes: {
