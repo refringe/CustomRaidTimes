@@ -56,7 +56,7 @@
         force: false,
 
         // Maximum number of bots that can be alive at once. Reduce if performance issues arise.
-        maximumBots: 28,
+        maximumBots: 26,
 
         // A wave is defined as a random number of bots that spawn at the same time at the same location.
         // The following settings control the number of waves that happen at once (per spawn group).
