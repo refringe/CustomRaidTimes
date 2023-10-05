@@ -23,6 +23,7 @@
 !/node_modules/uri-js
 !/node_modules/punycode
 !/node_modules/json5
+!/node_modules/weighted
 /package-lock.json
 /postInstall.mjs
 /tsconfig.json
