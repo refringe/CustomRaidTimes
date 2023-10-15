@@ -1,6 +1,6 @@
 {
     "name": "custom-raid-times",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "main": "src/CustomRaidTimes.js",
     "license": "MIT",
     "author": "Refringe",
@@ -15,21 +15,21 @@
         "ajv": "~8.12",
         "ajv-formats": "~2.1",
         "json5": "~2.2",
-        "weighted": "~1.0"
+        "weighted": "1.0"
     },
     "devDependencies": {
-        "@types/node": "20.4.5",
-        "@typescript-eslint/eslint-plugin": "6.2.0",
-        "@typescript-eslint/parser": "6.2.0",
+        "@types/node": "18.15.0",
+        "@typescript-eslint/eslint-plugin": "6.7.5",
+        "@typescript-eslint/parser": "6.7.5",
         "archiver": "^6.0",
-        "eslint": "8.46.0",
-        "eslint-config-prettier": "^8.8",
-        "eslint-plugin-prettier": "^4.2",
+        "eslint": "^8.51",
+        "eslint-config-prettier": "^9.0",
+        "eslint-plugin-prettier": "^5.0",
         "ignore": "^5.2",
         "os": "^0.1",
         "prettier": "^3.0",
         "tsyringe": "4.8.0",
-        "typescript": "5.1.6",
-        "winston": "^3.9"
+        "typescript": "5.2.2",
+        "winston": "3.11.0"
     }
 }
