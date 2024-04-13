@@ -1,20 +1,21 @@
-import { IPmcData } from "../models/eft/common/IPmcData";
-import { ProfileTraderTemplate } from "../models/eft/common/tables/IProfileTemplate";
-import { ITraderAssort, ITraderBase, LoyaltyLevel } from "../models/eft/common/tables/ITrader";
-import { Traders } from "../models/enums/Traders";
-import { ITraderConfig } from "../models/spt/config/ITraderConfig";
-import { ILogger } from "../models/spt/utils/ILogger";
-import { ConfigServer } from "../servers/ConfigServer";
-import { DatabaseServer } from "../servers/DatabaseServer";
-import { SaveServer } from "../servers/SaveServer";
-import { FenceService } from "../services/FenceService";
-import { LocalisationService } from "../services/LocalisationService";
-import { PlayerService } from "../services/PlayerService";
-import { RandomUtil } from "../utils/RandomUtil";
-import { TimeUtil } from "../utils/TimeUtil";
-import { HandbookHelper } from "./HandbookHelper";
-import { ItemHelper } from "./ItemHelper";
-import { ProfileHelper } from "./ProfileHelper";
+import { HandbookHelper } from "@spt-aki/helpers/HandbookHelper";
+import { ItemHelper } from "@spt-aki/helpers/ItemHelper";
+import { ProfileHelper } from "@spt-aki/helpers/ProfileHelper";
+import { IPmcData } from "@spt-aki/models/eft/common/IPmcData";
+import { Item } from "@spt-aki/models/eft/common/tables/IItem";
+import { ProfileTraderTemplate } from "@spt-aki/models/eft/common/tables/IProfileTemplate";
+import { ITraderAssort, ITraderBase, LoyaltyLevel } from "@spt-aki/models/eft/common/tables/ITrader";
+import { Traders } from "@spt-aki/models/enums/Traders";
+import { ITraderConfig } from "@spt-aki/models/spt/config/ITraderConfig";
+import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import { ConfigServer } from "@spt-aki/servers/ConfigServer";
+import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
+import { SaveServer } from "@spt-aki/servers/SaveServer";
+import { FenceService } from "@spt-aki/services/FenceService";
+import { LocalisationService } from "@spt-aki/services/LocalisationService";
+import { PlayerService } from "@spt-aki/services/PlayerService";
+import { RandomUtil } from "@spt-aki/utils/RandomUtil";
+import { TimeUtil } from "@spt-aki/utils/TimeUtil";
 export declare class TraderHelper {
     protected logger: ILogger;
     protected databaseServer: DatabaseServer;
@@ -34,27 +35,52 @@ export declare class TraderHelper {
     /** Dictionary of item tpl and the highest trader buy back rouble price */
     protected highestTraderBuyPriceItems: Record<string, number>;
     constructor(logger: ILogger, databaseServer: DatabaseServer, saveServer: SaveServer, profileHelper: ProfileHelper, handbookHelper: HandbookHelper, itemHelper: ItemHelper, playerService: PlayerService, localisationService: LocalisationService, fenceService: FenceService, timeUtil: TimeUtil, randomUtil: RandomUtil, configServer: ConfigServer);
+    /**
+     * Get a trader base object, update profile to reflect players current standing in profile
+     * when trader not found in profile
+     * @param traderID Traders Id to get
+     * @param sessionID Players id
+     * @returns Trader base
+     */
     getTrader(traderID: string, sessionID: string): ITraderBase;
-    getTraderAssortsById(traderId: string): ITraderAssort;
+    /**
+     * Get all assort data for a particular trader
+     * @param traderId Trader to get assorts for
+     * @returns ITraderAssort
+     */
+    getTraderAssortsByTraderId(traderId: string): ITraderAssort;
+    /**
+     * Retrieve the Item from a traders assort data by its id
+     * @param traderId Trader to get assorts for
+     * @param assortId Id of assort to find
+     * @returns Item object
+     */
+    getTraderAssortItemByAssortId(traderId: string, assortId: string): Item;
     /**
      * Reset a profiles trader data back to its initial state as seen by a level 1 player
      * Does NOT take into account different profile levels
-     * @param sessionID session id
+     * @param sessionID session id of player
      * @param traderID trader id to reset
      */
     resetTrader(sessionID: string, traderID: string): void;
+    /**
+     * Get the starting standing of a trader based on the current profiles type (e.g. EoD, Standard etc)
+     * @param traderId Trader id to get standing for
+     * @param rawProfileTemplate Raw profile from profiles.json to look up standing from
+     * @returns Standing value
+     */
     protected getStartingStanding(traderId: string, rawProfileTemplate: ProfileTraderTemplate): number;
     /**
      * Alter a traders unlocked status
      * @param traderId Trader to alter
      * @param status New status to use
-     * @param sessionId Session id
+     * @param sessionId Session id of player
      */
     setTraderUnlockedState(traderId: string, status: boolean, sessionId: string): void;
     /**
      * Add standing to a trader and level them up if exp goes over level threshold
-     * @param sessionId Session id
-     * @param traderId Traders id
+     * @param sessionId Session id of player
+     * @param traderId Traders id to add standing to
      * @param standingToAdd Standing value to add to trader
      */
     addStandingToTrader(sessionId: string, traderId: string, standingToAdd: number): void;
@@ -91,11 +117,11 @@ export declare class TraderHelper {
      */
     addTraderPurchasesToPlayerProfile(sessionID: string, newPurchaseDetails: {
         items: {
-            item_id: string;
+            itemId: string;
             count: number;
         }[];
-        tid: string;
-    }): void;
+        traderId: string;
+    }, itemPurchased: Item): void;
     /**
      * Get the highest rouble price for an item from traders
      * UNUSED
@@ -116,9 +142,30 @@ export declare class TraderHelper {
      */
     getTraderById(traderId: string): Traders;
     /**
+     * Validates that the provided traderEnumValue exists in the Traders enum. If the value is valid, it returns the
+     * same enum value, effectively serving as a trader ID; otherwise, it logs an error and returns an empty string.
+     * This method provides a runtime check to prevent undefined behavior when using the enum as a dictionary key.
+     *
+     * For example, instead of this:
+     * `const traderId = Traders[Traders.PRAPOR];`
+     *
+     * You can use safely use this:
+     * `const traderId = this.traderHelper.getValidTraderIdByEnumValue(Traders.PRAPOR);`
+     *
+     * @param traderEnumValue The trader enum value to validate
+     * @returns The validated trader enum value as a string, or an empty string if invalid
+     */
+    getValidTraderIdByEnumValue(traderEnumValue: Traders): string;
+    /**
      * Does the 'Traders' enum has a value that matches the passed in parameter
-     * @param value Value to check for
+     * @param key Value to check for
      * @returns True, values exists in Traders enum as a value
      */
-    traderEnumHasValue(value: string): boolean;
+    traderEnumHasKey(key: string): boolean;
+    /**
+     * Accepts a trader id
+     * @param traderId Trader id
+     * @returns Ttrue if Traders enum has the param as a value
+     */
+    traderEnumHasValue(traderId: string): boolean;
 }

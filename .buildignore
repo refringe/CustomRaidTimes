@@ -16,7 +16,6 @@
 /mod.code-workspace
 /node_modules/*
 !/node_modules/ajv
-!/node_modules/ajv-formats
 !/node_modules/fast-deep-equal
 !/node_modules/json-schema-traverse
 !/node_modules/require-from-string

@@ -1,7 +1,7 @@
 import { IParseOptions, IStringifyOptions, Reviver } from "jsonc/lib/interfaces";
-import { ILogger } from "../models/spt/utils/ILogger";
-import { HashUtil } from "./HashUtil";
-import { VFS } from "./VFS";
+import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import { HashUtil } from "@spt-aki/utils/HashUtil";
+import { VFS } from "@spt-aki/utils/VFS";
 export declare class JsonUtil {
     protected vfs: VFS;
     protected hashUtil: HashUtil;
@@ -28,11 +28,12 @@ export declare class JsonUtil {
     /**
      * From object to string
      * @param data object to turn into JSON
-    * @param filename Name of file being serialized
-    * @param options Stringify options or a replacer.
-    * @returns The string converted from the JavaScript value
+     * @param filename Name of file being serialized
+     * @param options Stringify options or a replacer.
+     * @returns The string converted from the JavaScript value
      */
     serializeJsonC(data: any, filename?: string | null, options?: IStringifyOptions | Reviver): string;
+    serializeJson5(data: any, filename?: string | null, prettify?: boolean): string;
     /**
      * From string to object
      * @param jsonString json string to turn into object
@@ -48,6 +49,7 @@ export declare class JsonUtil {
      * @returns object
      */
     deserializeJsonC<T>(jsonString: string, filename?: string, options?: IParseOptions): T;
+    deserializeJson5<T>(jsonString: string, filename?: string): T;
     deserializeWithCacheCheckAsync<T>(jsonString: string, filePath: string): Promise<T>;
     /**
      * From json string to object

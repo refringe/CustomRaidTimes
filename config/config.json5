@@ -27,6 +27,10 @@
             { minutes: 60, weight: 10 }, // 60 minute raid, used 10 times more often than a weight of 1.
             { minutes: 30, weight: { min: 2, max: 5 } }, // 30 minute raid, used 2-5 times more often than a weight of 1.
             { minutes: { min: 15, max: 20 }, weight: 1 }, // 15-20 minute raid, used as often as any other weight of 1.
+
+            // If all you want is a single long raid time, you can uncomment the following line and comment out or
+            // delete the three other lines above.
+            // { minutes: 360, weight: 1 }, // 6 hour raid (360 minutes).
         ],
 
         // Custom raid times for specific locations. Used when `override_all` is set to `false`.
@@ -39,37 +43,10 @@
             laboratory: 35,
             lighthouse: 40,
             reserve: 40,
+            groundZero: 35,
             shoreline: 45,
             streets: 50,
             woods: 40,
-        },
-    },
-
-    botSpawn: {
-        // Adjust regular bot spawn waves, ensuring bots continue to spawn throughout longer raids. If you're unsure if
-        // you should enable this, leave it *enabled*; the mod will automatically disable it at runtime if there are
-        // known conflicts with other mods.
-        adjustWaves: true,
-
-        // Want to force this mod to extend the bot spawn waves, even if it detects a conflict with another mod?
-        // Set this to `true` and roll the dice! OH YEAHHHHH! (Not responsible for any issues that arise from this.)
-        force: false,
-
-        // Maximum number of bots that can be alive at once. Reduce if performance issues arise.
-        maximumBots: 26,
-
-        // A wave is defined as a random number of bots that spawn at the same time at the same location.
-        // The following settings control the number of waves that happen at once (per spawn group).
-        wavesPerGroup: {
-            max: 4,
-            min: 1,
-        },
-
-        // A group is a collection of waves that happen in roughly the same time frame (but at different locations).
-        // The following settings control the timing between groups.
-        groupGapMinutes: {
-            max: 8,
-            min: 4,
         },
     },
 

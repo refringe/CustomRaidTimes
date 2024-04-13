@@ -1,7 +1,7 @@
-import { RandomUtil } from "@spt-aki/utils/RandomUtil";
+import type { RandomUtil } from "@spt-aki/utils/RandomUtil";
 import { select } from "weighted";
 import { CustomRaidTimes } from "../CustomRaidTimes";
-import { RaidTimes, TimeSetting } from "../types";
+import type { RaidTimes, TimeSetting } from "../types";
 
 /**
  * RaidTimeProcessor class.
@@ -41,11 +41,11 @@ export class RaidTimeProcessor {
         this.resolvedRaidTimes.overrideAll = this.raidTimes.overrideAll;
 
         // Resolve 'customTimes' for each location
-        Object.entries(this.raidTimes.customTimes).forEach(([location, timeSetting]) => {
+        for (const [location, timeSetting] of Object.entries(this.raidTimes.customTimes)) {
             this.resolvedRaidTimes.customTimes[location] = this.resolveTimeSettings(
                 timeSetting as TimeSetting[] | number
             );
-        });
+        }
 
         return this;
     }
@@ -63,8 +63,8 @@ export class RaidTimeProcessor {
 
         // Generate weighted items for selection
         const weightedItems = settings.reduce<Record<number, number>[]>((acc, setting) => {
-            let minutes = "minutes" in setting ? this.resolveValue(setting.minutes) : 0;
-            let weight = "weight" in setting ? this.resolveValue(setting.weight) : 1;
+            const minutes = "minutes" in setting ? this.resolveValue(setting.minutes) : 0;
+            const weight = "weight" in setting ? this.resolveValue(setting.weight) : 1;
 
             if ("minutes" in setting || "weight" in setting) {
                 acc.push({ [minutes]: weight });

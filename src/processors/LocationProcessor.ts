@@ -1,8 +1,7 @@
-import { ILocations } from "@spt-aki/models/spt/server/ILocations";
-import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
+import type { ILocations } from "@spt-aki/models/spt/server/ILocations";
+import type { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
 import { CustomRaidTimes } from "../CustomRaidTimes";
 import { RaidTimeAdjuster } from "../adjusters/RaidTimeAdjuster";
-import { SpawnWaveAdjuster } from "../adjusters/SpawnWaveAdjuster";
 import { TrainTimeAdjuster } from "../adjusters/TrainTimeAdjuster";
 
 /**
@@ -26,6 +25,7 @@ export class LocationProcessor {
         laboratory: { config: "laboratory", human: "Laboratory" },
         lighthouse: { config: "lighthouse", human: "Lighthouse" },
         rezervbase: { config: "reserve", human: "Reserve" },
+        sandbox: { config: "groundZero", human: "Ground Zero" },
         shoreline: { config: "shoreline", human: "Shoreline" },
         tarkovstreets: { config: "streets", human: "Streets of Tarkov" },
         woods: { config: "woods", human: "Woods" },
@@ -37,7 +37,6 @@ export class LocationProcessor {
      */
     constructor() {
         this.locations = CustomRaidTimes.container.resolve<DatabaseServer>("DatabaseServer").getTables().locations;
-        return this;
     }
 
     /**
@@ -49,9 +48,6 @@ export class LocationProcessor {
             const location = this.locations[locationName].base;
             new RaidTimeAdjuster(location).adjust();
             new TrainTimeAdjuster(location).adjust();
-            if (CustomRaidTimes.config.botSpawn.adjustWaves) {
-                new SpawnWaveAdjuster(location).adjust();
-            }
         }
     }
 }

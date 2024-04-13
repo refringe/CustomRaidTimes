@@ -1,5 +1,6 @@
-import { JSONSchema7 } from "json-schema";
+import type { JSONSchema7 } from "json-schema";
 
+// biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class ConfigSchema {
     /* eslint-disable @typescript-eslint/naming-convention */
     public static readonly schema: JSONSchema7 = {
@@ -42,31 +43,6 @@ export class ConfigSchema {
                 },
                 required: ["overrideAll", "override", "customTimes"],
             },
-            botSpawn: {
-                type: "object",
-                properties: {
-                    adjustWaves: { type: "boolean" },
-                    force: { type: "boolean" },
-                    maximumBots: { type: "integer" },
-                    wavesPerGroup: {
-                        type: "object",
-                        properties: {
-                            max: { type: "integer" },
-                            min: { type: "integer" },
-                        },
-                        required: ["max", "min"],
-                    },
-                    groupGapMinutes: {
-                        type: "object",
-                        properties: {
-                            max: { type: "integer" },
-                            min: { type: "integer" },
-                        },
-                        required: ["max", "min"],
-                    },
-                },
-                required: ["adjustWaves", "force", "maximumBots", "wavesPerGroup", "groupGapMinutes"],
-            },
             trainSchedule: {
                 type: "object",
                 properties: {
@@ -84,7 +60,7 @@ export class ConfigSchema {
                 required: ["auto", "static"],
             },
         },
-        required: ["general", "raidTimes", "botSpawn", "trainSchedule"],
+        required: ["general", "raidTimes", "trainSchedule"],
         definitions: {
             timeWeight: {
                 type: "object",

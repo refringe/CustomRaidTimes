@@ -1,10 +1,9 @@
-import { EquipmentBuildType } from "../../../models/enums/EquipmentBuildType";
-import { QuestStatus } from "../../../models/enums/QuestStatus";
-import { Health, Productive, Skills, TraderData } from "../common/tables/IBotBase";
-import { Item, Upd } from "../common/tables/IItem";
-import { IQuest } from "../common/tables/IQuest";
-import { IPmcDataRepeatableQuest } from "../common/tables/IRepeatableQuests";
-import { IRagfairOffer } from "../ragfair/IRagfairOffer";
+import { Health, IQuestStatus, Productive, Skills } from "@spt-aki/models/eft/common/tables/IBotBase";
+import { Item, Upd } from "@spt-aki/models/eft/common/tables/IItem";
+import { IQuest } from "@spt-aki/models/eft/common/tables/IQuest";
+import { IPmcDataRepeatableQuest } from "@spt-aki/models/eft/common/tables/IRepeatableQuests";
+import { IRagfairOffer } from "@spt-aki/models/eft/ragfair/IRagfairOffer";
+import { EquipmentBuildType } from "@spt-aki/models/enums/EquipmentBuildType";
 export interface IItemEventRouterBase {
     warnings: Warning[];
     profileChanges: TProfileChanges | "";
@@ -33,19 +32,11 @@ export interface ProfileChange {
     repeatableQuests?: IPmcDataRepeatableQuest[];
     recipeUnlocked: Record<string, boolean>;
     changedHideoutStashes?: Record<string, IHideoutStashItem>;
-    questsStatus: QuestStatusChange[];
+    questsStatus: IQuestStatus[];
 }
 export interface IHideoutStashItem {
     Id: string;
     Tpl: string;
-}
-export interface QuestStatusChange {
-    qid: string;
-    startTime: number;
-    status: QuestStatus;
-    statusTimers: Record<QuestStatus, number>;
-    completedConditions: string[];
-    availableAfter: number;
 }
 export interface IWeaponBuildChange {
     id: string;
@@ -70,6 +61,14 @@ export interface ItemChanges {
 export interface Improvement {
     completed: boolean;
     improveCompleteTimestamp: number;
+}
+/** Related to TraderInfo */
+export interface TraderData {
+    salesSum: number;
+    standing: number;
+    loyalty: number;
+    unlocked: boolean;
+    disabled: boolean;
 }
 export interface Product {
     _id: string;

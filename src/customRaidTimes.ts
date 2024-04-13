@@ -6,7 +6,7 @@ import { DependencyContainer } from "tsyringe";
 import { LocationProcessor } from "./processors/LocationProcessor";
 import { RaidTimeProcessor } from "./processors/RaidTimeProcessor";
 import { ConfigServer } from "./servers/ConfigServer";
-import type { Configuration, IncompatibleModEntry } from "./types";
+import type { Configuration } from "./types";
 
 /**
  * CustomRaidTimes mod.
@@ -15,15 +15,6 @@ export class CustomRaidTimes implements IPostDBLoadMod, IPreAkiLoadMod {
     public static container: DependencyContainer;
     public static logger: ILogger;
     public static config: Configuration | null = null;
-
-    // Definition of incompatible mods and corresponding adjustments.
-    public static conflicts: IncompatibleModEntry[] = [
-        {
-            mods: ["SWAG", "MOAR", "BetterSpawnsPlus"],
-            config: "botSpawn.adjustWaves",
-            value: false,
-        },
-    ];
 
     /**
      * Handle loading the configuration file and registering our custom CustomRaidTimesMatchEnd route.
@@ -37,8 +28,8 @@ export class CustomRaidTimes implements IPostDBLoadMod, IPreAkiLoadMod {
 
         // Load and validate the configuration file, saving it to the static config property for simple access.
         try {
-            CustomRaidTimes.config = new ConfigServer().loadConfig().validateConfig().adjustConflicts().getConfig();
-        } catch (error: any) {
+            CustomRaidTimes.config = new ConfigServer().loadConfig().validateConfig().getConfig();
+        } catch (error) {
             CustomRaidTimes.config = null; // Set the config to null so we know it's failed to load or validate.
             CustomRaidTimes.logger.log(`CustomRaidTimes: ${error.message}`, "red");
         }
@@ -64,7 +55,7 @@ export class CustomRaidTimes implements IPostDBLoadMod, IPreAkiLoadMod {
                 {
                     url: "/client/match/offline/end",
                     action: (url, info, sessionId, output) => {
-                        if (CustomRaidTimes.config!.general.debug) {
+                        if (CustomRaidTimes.config?.general?.debug) {
                             CustomRaidTimes.logger.log(
                                 "CustomRaidTimes: CustomRaidTimesMatchEnd route has been triggered.",
                                 "gray"

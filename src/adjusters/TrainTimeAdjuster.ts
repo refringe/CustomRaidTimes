@@ -30,11 +30,11 @@ export class TrainTimeAdjuster {
      * appropriate function to handle the logic.
      */
     public adjust(): void {
-        this.location.exits.forEach(exit => {
+        for (const exit of this.location.exits) {
             if (exit.PassageRequirement?.toLowerCase() === "train") {
                 this.adjustTrainExit(exit);
             }
-        });
+        }
     }
 
     /**
@@ -179,7 +179,7 @@ export class TrainTimeAdjuster {
      * Adjust the earliest arrival time to 65%-20% of the available time; a minimum of 1 minute.
      */
     private getAdjustmentTime(trainArriveEarliest: number): number {
-        const adjustmentPercentage = parseFloat(
+        const adjustmentPercentage = Number.parseFloat(
             (
                 Math.random() * (this.BUFFER_ADJUSTMENT_MAX_PERCENT - this.BUFFER_ADJUSTMENT_MIN_PERCENT) +
                 this.BUFFER_ADJUSTMENT_MIN_PERCENT

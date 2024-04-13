@@ -21,7 +21,7 @@ export class RaidTimeAdjuster {
      */
     public adjust(): void {
         const originalTime = this.location.EscapeTimeLimit;
-        
+
         if (CustomRaidTimes.config.raidTimes.overrideAll) {
             this.location.EscapeTimeLimit = Number(CustomRaidTimes.config.raidTimes.override);
         } else {

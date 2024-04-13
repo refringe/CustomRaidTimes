@@ -6,9 +6,9 @@
  * injection to fail in a very confusing way, which will likely consume your afternoon and make you want to cry. :D
  */
 
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const sptProjectFile = path.join(currentDirectory, "../../../src/Program.ts");
