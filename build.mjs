@@ -26,7 +26,7 @@
  * - The script reads configurations from the `package.json` and `.buildignore` files; ensure they are correctly set up.
  *
  * @author Refringe
- * @version v1.0.0
+ * @version v1.0.1
  */
 
 import archiver from "archiver";
@@ -96,8 +96,12 @@ async function main() {
         const packageJson = await loadPackageJson(currentDir);
 
         // Create a descriptive name for the mod package.
-        const projectName = createProjectName(packageJson);
+        const projectName = createProjectName(packageJson, false);
         logger.log("success", `Project name created: ${projectName}`);
+
+        // Create a descriptive name for the ZIP file.
+        const zipFileName = createProjectName(packageJson, true);
+        logger.log("success", `Project package name created: ${zipFileName}`);
 
         // Remove the old distribution directory and create a fresh one.
         const distDir = await removeOldDistDirectory(currentDir);
@@ -115,13 +119,13 @@ async function main() {
 
         // Create a zip archive of the project files.
         logger.log("info", "Beginning folder compression...");
-        const zipFilePath = path.join(path.dirname(projectDir), `${projectName}.zip`);
+        const zipFilePath = path.join(path.dirname(projectDir), `${zipFileName}.zip`);
         await createZipFile(projectDir, zipFilePath, `user/mods/${projectName}`);
         logger.log("success", "Archive successfully created.");
         logger.log("info", zipFilePath);
 
         // Move the zip file inside of the project directory, within the temporary working directory.
-        const zipFileInProjectDir = path.join(projectDir, `${projectName}.zip`);
+        const zipFileInProjectDir = path.join(projectDir, `${zipFileName}.zip`);
         await fs.move(zipFilePath, zipFileInProjectDir);
         logger.log("success", "Archive successfully moved.");
         logger.log("info", zipFileInProjectDir);
@@ -134,7 +138,7 @@ async function main() {
         logger.log("success", "------------------------------------");
         logger.log("success", "Build script completed successfully!");
         logger.log("success", "Your mod package has been created in the 'dist' directory:");
-        logger.log("success", `${path.relative(process.cwd(), path.join(distDir, `${projectName}.zip`))}`);
+        logger.log("success", `${path.relative(process.cwd(), path.join(distDir, `${zipFileName}.zip`))}`);
         logger.log("success", "------------------------------------");
         if (!verbose) {
             logger.log("success", "To see a detailed build log, use `npm run buildinfo`.");
@@ -220,14 +224,17 @@ async function loadPackageJson(currentDir) {
  * @param {Object} packageJson - A JSON object containing the contents of the `package.json` file.
  * @returns {string} A string representing the constructed project name.
  */
-function createProjectName(packageJson) {
+function createProjectName(packageJson, includeVersion = true) {
     // Remove any non-alphanumeric characters from the author and name.
     const author = packageJson.author.replace(/\W/g, "");
     const name = packageJson.name.replace(/\W/g, "");
     const version = packageJson.version;
 
     // Ensure the name is lowercase, as per the package.json specification.
-    return `${author}-${name}-${version}`.toLowerCase();
+    if (includeVersion) {
+        return `${author}-${name}-${version}`.toLowerCase();
+    }
+    return `${author}-${name}`.toLowerCase();
 }
 
 /**
