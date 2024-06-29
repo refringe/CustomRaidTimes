@@ -1,7 +1,7 @@
 {
     "name": "custom-raid-times",
     "version": "1.6.0",
-    "main": "src/CustomRaidTimes.js",
+    "main": "src/customRaidTimes.js",
     "license": "MIT",
     "author": "Refringe",
     "akiVersion": "~3.8",
