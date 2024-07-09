@@ -1,10 +1,10 @@
 {
     "name": "custom-raid-times",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "main": "src/CustomRaidTimes.js",
     "license": "MIT",
     "author": "Refringe",
-    "akiVersion": "~3.8",
+    "sptVersion": "~3.9",
     "scripts": {
         "setup": "npm i",
         "postinstall": "node ./postInstall.mjs",
@@ -12,25 +12,25 @@
         "buildinfo": "node ./build.mjs --verbose"
     },
     "dependencies": {
-        "ajv": "~8.12",
-        "json5": "~2.2",
-        "weighted": "1.0"
+        "ajv": "^8.16",
+        "json5": "^2.2",
+        "weighted": "^1.0"
     },
     "devDependencies": {
-        "@types/node": "~20.12",
-        "@typescript-eslint/eslint-plugin": "7.6.0",
-        "@typescript-eslint/parser": "7.6.0",
-        "ajv-formats": "~3.0",
-        "archiver": "~7.0",
-        "eslint": "^8",
+        "@types/node": "20.11.1",
+        "@typescript-eslint/eslint-plugin": "^7.16",
+        "@typescript-eslint/parser": "^7.16",
+        "ajv-formats": "^3.0",
+        "archiver": "^7.0",
+        "eslint": "^8.0",
         "eslint-config-prettier": "^9.0",
         "eslint-plugin-prettier": "^5.0",
-        "fs-extra": "^11.2.0",
+        "fs-extra": "^11.2",
         "ignore": "^5.2",
         "os": "^0.1",
-        "prettier": "^3.0",
-        "tsyringe": "4.8.0",
-        "typescript": "~5.4",
-        "winston": "~3.13"
+        "prettier": "^3.3",
+        "tsyringe": "^4.8",
+        "typescript": "^5.5",
+        "winston": "^3.13"
     }
 }

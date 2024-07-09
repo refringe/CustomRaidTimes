@@ -1,7 +1,7 @@
-import type { RandomUtil } from "@spt-aki/utils/RandomUtil";
+import type { RandomUtil } from "@spt/utils/RandomUtil";
 import { select } from "weighted";
-import { CustomRaidTimes } from "../CustomRaidTimes";
 import type { RaidTimes, TimeSetting } from "../types";
+import { DependencyContainer } from "tsyringe";
 
 /**
  * RaidTimeProcessor class.
@@ -11,7 +11,6 @@ import type { RaidTimes, TimeSetting } from "../types";
  */
 export class RaidTimeProcessor {
     private randomUtil: RandomUtil;
-    private raidTimes: RaidTimes;
     private resolvedRaidTimes: RaidTimes = {
         overrideAll: false,
         override: 0,
@@ -23,9 +22,8 @@ export class RaidTimeProcessor {
      *
      * @param {RaidTimes} raidTimes - The raid times from the configuration.
      */
-    constructor(raidTimes: RaidTimes) {
-        this.raidTimes = raidTimes;
-        this.randomUtil = CustomRaidTimes.container.resolve<RandomUtil>("RandomUtil");
+    constructor(container: DependencyContainer) {
+        this.randomUtil = container.resolve<RandomUtil>("RandomUtil");
     }
 
     /**
@@ -33,15 +31,15 @@ export class RaidTimeProcessor {
      *
      * @returns {RaidTimeProcessor} - Returns the instance for chaining.
      */
-    public processTimes(): RaidTimeProcessor {
+    public processTimes(raidTimes: RaidTimes): RaidTimeProcessor {
         // Resolve the 'override' raid time
-        this.resolvedRaidTimes.override = this.resolveTimeSettings(this.raidTimes.override);
+        this.resolvedRaidTimes.override = this.resolveTimeSettings(raidTimes.override);
 
         // Copy 'overrideAll' value from the original configuration
-        this.resolvedRaidTimes.overrideAll = this.raidTimes.overrideAll;
+        this.resolvedRaidTimes.overrideAll = raidTimes.overrideAll;
 
         // Resolve 'customTimes' for each location
-        for (const [location, timeSetting] of Object.entries(this.raidTimes.customTimes)) {
+        for (const [location, timeSetting] of Object.entries(raidTimes.customTimes)) {
             this.resolvedRaidTimes.customTimes[location] = this.resolveTimeSettings(
                 timeSetting as TimeSetting[] | number
             );

@@ -1,6 +1,8 @@
-import type { Exit, ILocationBase } from "@spt-aki/models/eft/common/ILocationBase";
-import { CustomRaidTimes } from "../CustomRaidTimes";
+import type { Exit, ILocationBase } from "@spt/models/eft/common/ILocationBase";
 import { LocationProcessor } from "../processors/LocationProcessor";
+import type { Configuration } from "../types";
+import { DependencyContainer } from "tsyringe";
+import type { ILogger } from "@spt/models/spt/utils/ILogger";
 
 /**
  * TrainTimeAdjuster class.
@@ -17,10 +19,12 @@ export class TrainTimeAdjuster {
     private readonly BUFFER_ADJUSTMENT_MAX_PERCENT = 0.65;
     private readonly BUFFER_ADJUSTMENT_MIN_PERCENT = 0.2;
 
+    private logger: ILogger;
     private location: ILocationBase;
     private locationName: { config: string; human: string };
 
-    constructor(location: ILocationBase) {
+    constructor(container: DependencyContainer, location: ILocationBase) {
+        this.logger = container.resolve<ILogger>("WinstonLogger");
         this.location = location;
         this.locationName = LocationProcessor.locationNames[location.Id.toString().toLowerCase()];
     }
@@ -29,10 +33,10 @@ export class TrainTimeAdjuster {
      * Main entry point for adjusting the train times. Checks to see if the exit is a train exit, and if so, calls the
      * appropriate function to handle the logic.
      */
-    public adjust(): void {
+    public adjust(config: Configuration): void {
         for (const exit of this.location.exits) {
             if (exit.PassageRequirement?.toLowerCase() === "train") {
-                this.adjustTrainExit(exit);
+                this.adjustTrainExit(exit, config);
             }
         }
     }
@@ -40,7 +44,7 @@ export class TrainTimeAdjuster {
     /**
      * Handles the brunt of the logic for adjusting the train times.
      */
-    private adjustTrainExit(exit: Exit): void {
+    private adjustTrainExit(exit: Exit, config: Configuration): void {
         const raidTimeSec = this.location.EscapeTimeLimit * 60;
         const trainExtractWaitSec = exit.ExfiltrationTime;
         let trainWaitSec: number;
@@ -55,12 +59,12 @@ export class TrainTimeAdjuster {
             trainWaitSec
         );
 
-        if (!CustomRaidTimes.config.trainSchedule.auto) {
+        if (!config.trainSchedule.auto) {
             // Static scheduling will still have the arrival times validated and adjusted but will not be shifted to
             // earlier into the raid if there's available buffer time.
-            trainArriveEarliest = CustomRaidTimes.config.trainSchedule.static.arriveEarliestMinutes * 60;
-            trainArriveLatest = CustomRaidTimes.config.trainSchedule.static.arriveLatestMinutes * 60;
-            trainWaitSec = CustomRaidTimes.config.trainSchedule.static.trainWaitSeconds;
+            trainArriveEarliest = config.trainSchedule.static.arriveEarliestMinutes * 60;
+            trainArriveLatest = config.trainSchedule.static.arriveLatestMinutes * 60;
+            trainWaitSec = config.trainSchedule.static.trainWaitSeconds;
 
             const calculatedLatestArrival = this.getLatestTrainArrivalTime(
                 raidTimeSec,
@@ -85,7 +89,7 @@ export class TrainTimeAdjuster {
 
             // We tried, but the train is going too be late. Warn the user.
             if (trainArriveLatest < 0) {
-                CustomRaidTimes.logger.log(
+                this.logger.log(
                     `CustomRaidTimes: ${this.locationName.human} Train Schedule - Train cannot depart before the end of the raid. Raid time is too short.`,
                     "yellow"
                 );
@@ -94,7 +98,7 @@ export class TrainTimeAdjuster {
 
         // If there is enough available time, shift the earliest arrival time to 65%-20% of the available time (a
         // minimum of 1 minute). This does not apply to static scheduling.
-        if (CustomRaidTimes.config.trainSchedule.auto && trainArriveEarliest > this.BUFFER_SEC) {
+        if (config.trainSchedule.auto && trainArriveEarliest > this.BUFFER_SEC) {
             trainArriveEarliest -= this.getAdjustmentTime(trainArriveEarliest);
         }
 
@@ -106,8 +110,8 @@ export class TrainTimeAdjuster {
         const trainArriveEarliestMin = (trainArriveEarliest / 60).toFixed(2);
         const trainArriveLatestMin = (trainArriveLatest / 60).toFixed(2);
         const trainWaitMin = (trainWaitSec / 60).toFixed(2);
-        if (CustomRaidTimes.config.general.debug) {
-            CustomRaidTimes.logger.log(
+        if (config.general.debug) {
+            this.logger.log(
                 `CustomRaidTimes: ${this.locationName.human} Train Schedule - Earliest: ${trainArriveEarliestMin} minutes, Latest: ${trainArriveLatestMin} minutes, Wait: ${trainWaitMin} minutes.`,
                 "gray"
             );

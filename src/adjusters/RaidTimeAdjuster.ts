@@ -1,6 +1,8 @@
-import type { ILocationBase } from "@spt-aki/models/eft/common/ILocationBase";
-import { CustomRaidTimes } from "../CustomRaidTimes";
+import type { ILocationBase } from "@spt/models/eft/common/ILocationBase";
 import { LocationProcessor } from "../processors/LocationProcessor";
+import type { Configuration } from "../types";
+import { DependencyContainer } from "tsyringe";
+import type { ILogger } from "@spt/models/spt/utils/ILogger";
 
 /**
  * RaidTimeAdjuster class.
@@ -8,10 +10,12 @@ import { LocationProcessor } from "../processors/LocationProcessor";
  * Handles the logic needed to set a new raid time.
  */
 export class RaidTimeAdjuster {
+    public logger: ILogger;
     private location: ILocationBase;
     private locationName: { config: string; human: string };
 
-    constructor(location: ILocationBase) {
+    constructor(container: DependencyContainer, location: ILocationBase) {
+        this.logger = container.resolve<ILogger>("WinstonLogger");
         this.location = location;
         this.locationName = LocationProcessor.locationNames[location.Id.toString().toLowerCase()];
     }
@@ -19,18 +23,18 @@ export class RaidTimeAdjuster {
     /**
      * Adjusts the raid time of the location.
      */
-    public adjust(): void {
+    public adjust(config: Configuration): void {
         const originalTime = this.location.EscapeTimeLimit;
 
-        if (CustomRaidTimes.config.raidTimes.overrideAll) {
-            this.location.EscapeTimeLimit = Number(CustomRaidTimes.config.raidTimes.override);
+        if (config.raidTimes.overrideAll) {
+            this.location.EscapeTimeLimit = Number(config.raidTimes.override);
         } else {
-            const customTime = CustomRaidTimes.config.raidTimes.customTimes[this.locationName.config];
+            const customTime = config.raidTimes.customTimes[this.locationName.config];
             this.location.EscapeTimeLimit = Number(customTime);
         }
 
-        if (CustomRaidTimes.config.general.debug && this.location.EscapeTimeLimit !== originalTime) {
-            CustomRaidTimes.logger.log(
+        if (config.general.debug && this.location.EscapeTimeLimit !== originalTime) {
+            this.logger.log(
                 `CustomRaidTimes: ${this.locationName.human} raid time change from ${originalTime} minutes to ${this.location.EscapeTimeLimit} minutes.`,
                 "gray"
             );

@@ -13,14 +13,9 @@
         "outDir": "tmp",
         "baseUrl": ".",
         "paths": {
-            "@spt-aki/*": ["./types/*"]
+            "@spt/*": ["./types/*"]
         }
     },
-    "lib": [
-        "es2020"
-    ],
-    "include": [
-        "src/*",
-        "src/**/*"
-    ]
+    "lib": ["es2020"],
+    "include": ["src/*", "src/**/*"]
 }
