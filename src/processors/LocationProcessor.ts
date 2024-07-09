@@ -1,5 +1,6 @@
 import type { ILocations } from "@spt/models/spt/server/ILocations";
 import type { DatabaseServer } from "@spt/servers/DatabaseServer";
+import type { ILogger } from "@spt/models/spt/utils/ILogger";
 import { RaidTimeAdjuster } from "../adjusters/RaidTimeAdjuster";
 import { TrainTimeAdjuster } from "../adjusters/TrainTimeAdjuster";
 import { DependencyContainer } from "tsyringe";
@@ -12,6 +13,7 @@ import type { Configuration } from "../types";
  */
 export class LocationProcessor {
     private container: DependencyContainer;
+    private logger: ILogger;
     private locations: ILocations;
 
     /**
@@ -38,6 +40,7 @@ export class LocationProcessor {
      */
     constructor(container: DependencyContainer) {
         this.container = container;
+        this.logger = container.resolve<ILogger>("WinstonLogger");
         this.locations = container.resolve<DatabaseServer>("DatabaseServer").getTables().locations;
     }
 
@@ -51,5 +54,10 @@ export class LocationProcessor {
             new RaidTimeAdjuster(this.container, location).adjust(config);
             new TrainTimeAdjuster(this.container, location).adjust(config);
         }
+
+        this.logger.log(
+            "CustomRaidTimes: Raid times have been successfully adjusted according to the configuration.",
+            "cyan"
+        );
     }
 }

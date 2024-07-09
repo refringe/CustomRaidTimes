@@ -12,15 +12,14 @@ import type { Configuration } from "./types";
  * CustomRaidTimes mod.
  */
 class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
-    public logger: ILogger;
-    public config: Configuration | null = null;
+    private logger: ILogger;
+    private config: Configuration | null = null;
 
     /**
      * Handle loading the configuration file and registering our custom CustomRaidTimesMatchEnd route.
      * Runs before the database is loaded.
      */
     public preSptLoad(container: DependencyContainer): void {
-        // Resolve the logger.
         this.logger = container.resolve<ILogger>("WinstonLogger");
 
         // Load and validate the configuration file.

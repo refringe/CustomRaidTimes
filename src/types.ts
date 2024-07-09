@@ -1,9 +1,6 @@
-import type { Wave } from "@spt/models/eft/common/ILocationBase";
-
 export interface Configuration {
     general: General;
     raidTimes: RaidTimes;
-    botSpawn: BotSpawn;
     trainSchedule: TrainSchedule;
 }
 
@@ -27,14 +24,6 @@ export interface CustomTimes {
     [location: string]: number | TimeSetting[];
 }
 
-export interface BotSpawn {
-    adjustWaves: boolean;
-    force: boolean;
-    maximumBots: number;
-    wavesPerGroup: { max: number; min: number };
-    groupGapMinutes: { max: number; min: number };
-}
-
 export interface TrainSchedule {
     auto: boolean;
     static: {
@@ -42,21 +31,4 @@ export interface TrainSchedule {
         arriveLatestMinutes: number;
         trainWaitSeconds: number;
     };
-}
-
-export interface IncompatibleModEntry {
-    mods: string[];
-    config: string;
-    value: boolean;
-}
-
-export type ExtendedWave = Wave & {
-    group: number;
-};
-
-export interface GroupTimeParams {
-    min: number;
-    max: number;
-    offset: number;
-    middle: number;
 }
