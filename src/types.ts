@@ -13,6 +13,7 @@ export interface RaidTimes {
     overrideAll: boolean;
     override: number | TimeSetting[];
     customTimes: CustomTimes;
+    overrideScav: boolean;
 }
 
 export interface TimeSetting {

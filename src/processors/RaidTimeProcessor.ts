@@ -15,6 +15,7 @@ export class RaidTimeProcessor {
         overrideAll: false,
         override: 0,
         customTimes: {},
+        overrideScav: false,
     };
 
     /**
@@ -44,6 +45,9 @@ export class RaidTimeProcessor {
                 timeSetting as TimeSetting[] | number
             );
         }
+
+        // Copy 'overrideScav' value from the original configuration
+        this.resolvedRaidTimes.overrideScav = raidTimes.overrideScav;
 
         return this;
     }

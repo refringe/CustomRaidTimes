@@ -3,9 +3,14 @@ import type { IPreSptLoadMod } from "@spt/models/external/IPreSptLoadMod";
 import type { ILogger } from "@spt/models/spt/utils/ILogger";
 import type { StaticRouterModService } from "@spt/services/mod/staticRouter/StaticRouterModService";
 import { DependencyContainer } from "tsyringe";
+import { RaidTimeAdjustmentService } from "@spt/services/RaidTimeAdjustmentService";
+import { IGetRaidTimeRequest } from "@spt/models/eft/game/IGetRaidTimeRequest";
+import { IGetRaidTimeResponse } from "@spt/models/eft/game/IGetRaidTimeResponse";
 import { LocationProcessor } from "./processors/LocationProcessor";
 import { RaidTimeProcessor } from "./processors/RaidTimeProcessor";
 import { ConfigServer } from "./servers/ConfigServer";
+import { ILocationBase } from "@spt/models/eft/common/ILocationBase";
+import { DatabaseService } from "@spt/services/DatabaseService";
 import type { Configuration } from "./types";
 
 /**
@@ -14,12 +19,14 @@ import type { Configuration } from "./types";
 class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
     private logger: ILogger;
     private config: Configuration | null = null;
+    private container: DependencyContainer;
 
     /**
      * Handle loading the configuration file and registering our custom CustomRaidTimesMatchEnd route.
      * Runs before the database is loaded.
      */
     public preSptLoad(container: DependencyContainer): void {
+        this.container = container;
         this.logger = container.resolve<ILogger>("WinstonLogger");
 
         // Load and validate the configuration file.
@@ -66,6 +73,46 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
             ],
             "CustomRaidTimesMatchEnd"
         );
+
+        // Register a replacement for the RaidTimeAdjustmentService getRaidAdjustments method if the configuration is
+        // set to override the scav raid times as well.
+        if (this.config?.raidTimes?.overrideScav) {
+            container.afterResolution(
+                "RaidTimeAdjustmentService",
+                (_t, result: RaidTimeAdjustmentService) => {
+                    result.getRaidAdjustments = (
+                        sessionId: string,
+                        request: IGetRaidTimeRequest
+                    ): IGetRaidTimeResponse => {
+                        return this.getRaidAdjustments(request);
+                    };
+                },
+                { frequency: "Always" }
+            );
+        }
+    }
+
+    /**
+     * Return the same response as the original method, even if you're a scav.
+     * @override @spt/services/RaidTimeAdjustmentService.getRaidAdjustments
+     */
+    private getRaidAdjustments(request: IGetRaidTimeRequest): IGetRaidTimeResponse {
+        const databaseService = this.container.resolve<DatabaseService>("DatabaseService");
+
+        const globals = databaseService.getGlobals();
+        const mapBase: ILocationBase = databaseService.getLocation(request.Location.toLowerCase()).base;
+        const baseEscapeTimeMinutes = mapBase.EscapeTimeLimit;
+
+        const result: IGetRaidTimeResponse = {
+            RaidTimeMinutes: baseEscapeTimeMinutes,
+            ExitChanges: [],
+            NewSurviveTimeSeconds: undefined,
+            OriginalSurvivalTimeSeconds: globals.config.exp.match_end.survived_seconds_requirement,
+        };
+
+        this.logger.log("CustomRaidTimes: The `getRaidAdjustments` override has been triggered.", "cyan");
+
+        return result;
     }
 
     /**

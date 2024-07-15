@@ -40,8 +40,9 @@ export class ConfigSchema {
                             ],
                         },
                     },
+                    overrideScav: { type: "boolean" },
                 },
-                required: ["overrideAll", "override", "customTimes"],
+                required: ["overrideAll", "override", "customTimes", "overrideScav"],
             },
             trainSchedule: {
                 type: "object",

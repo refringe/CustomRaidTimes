@@ -48,6 +48,9 @@
             streets: 50,
             woods: 40,
         },
+
+        // Override scav raid times?
+        overrideScav: true,
     },
 
     trainSchedule: {
