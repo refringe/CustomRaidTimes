@@ -37,14 +37,15 @@
         // The option can be a number, or an object containing minutes and weight options as described above.
         customTimes: {
             customs: 40,
-            factoryDay: 19,
+            factoryDay: 20,
             factoryNight: 25,
             interchange: 40,
             laboratory: 35,
             lighthouse: 40,
             reserve: 40,
-            groundZero: 27,
-            shoreline: 35,
+            groundZero: 35,
+            groundZeroHigh: 35,
+            shoreline: 45,
             streets: 50,
             woods: 40,
         },

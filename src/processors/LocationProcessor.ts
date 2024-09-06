@@ -29,6 +29,7 @@ export class LocationProcessor {
         lighthouse: { config: "lighthouse", human: "Lighthouse" },
         rezervbase: { config: "reserve", human: "Reserve" },
         sandbox: { config: "groundZero", human: "Ground Zero" },
+        sandbox_high: { config: "groundZeroHigh", human: "Ground Zero High" },
         shoreline: { config: "shoreline", human: "Shoreline" },
         tarkovstreets: { config: "streets", human: "Streets of Tarkov" },
         woods: { config: "woods", human: "Woods" },
