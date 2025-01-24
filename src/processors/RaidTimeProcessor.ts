@@ -1,7 +1,7 @@
 import type { RandomUtil } from "@spt/utils/RandomUtil";
+import { DependencyContainer } from "tsyringe";
 import { select } from "weighted";
 import type { RaidTimes, TimeSetting } from "../types";
-import { DependencyContainer } from "tsyringe";
 
 /**
  * RaidTimeProcessor class.
@@ -42,7 +42,7 @@ export class RaidTimeProcessor {
         // Resolve 'customTimes' for each location
         for (const [location, timeSetting] of Object.entries(raidTimes.customTimes)) {
             this.resolvedRaidTimes.customTimes[location] = this.resolveTimeSettings(
-                timeSetting as TimeSetting[] | number
+                timeSetting as TimeSetting[] | number,
             );
         }
 

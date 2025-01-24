@@ -1,9 +1,9 @@
 import type { ILocations } from "@spt/models/spt/server/ILocations";
-import type { DatabaseServer } from "@spt/servers/DatabaseServer";
 import type { ILogger } from "@spt/models/spt/utils/ILogger";
+import type { DatabaseServer } from "@spt/servers/DatabaseServer";
+import { DependencyContainer } from "tsyringe";
 import { RaidTimeAdjuster } from "../adjusters/RaidTimeAdjuster";
 import { TrainTimeAdjuster } from "../adjusters/TrainTimeAdjuster";
-import { DependencyContainer } from "tsyringe";
 import type { Configuration } from "../types";
 
 /**
@@ -20,7 +20,6 @@ export class LocationProcessor {
      * Mapping of internal location names to their respective configuration and human-readable names.
      */
     public static readonly locationNames = {
-        /* eslint-disable @typescript-eslint/naming-convention */
         bigmap: { config: "customs", human: "Customs" },
         factory4_day: { config: "factoryDay", human: "Factory (Day)" },
         factory4_night: { config: "factoryNight", human: "Factory (Night)" },
@@ -33,7 +32,6 @@ export class LocationProcessor {
         shoreline: { config: "shoreline", human: "Shoreline" },
         tarkovstreets: { config: "streets", human: "Streets of Tarkov" },
         woods: { config: "woods", human: "Woods" },
-        /* eslint-enable @typescript-eslint/naming-convention */
     };
 
     /**
@@ -58,7 +56,7 @@ export class LocationProcessor {
 
         this.logger.log(
             "CustomRaidTimes: Raid times have been successfully adjusted according to the configuration.",
-            "cyan"
+            "cyan",
         );
     }
 }

@@ -1,8 +1,7 @@
 import type { JSONSchema7 } from "json-schema";
 
-// biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
+// biome-ignore lint/complexity/noStaticOnlyClass:
 export class ConfigSchema {
-    /* eslint-disable @typescript-eslint/naming-convention */
     public static readonly schema: JSONSchema7 = {
         $schema: "http://json-schema.org/draft-07/schema#",
         type: "object",
@@ -97,5 +96,4 @@ export class ConfigSchema {
             },
         },
     };
-    /* eslint-enable @typescript-eslint/naming-convention */
 }

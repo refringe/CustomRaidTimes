@@ -1,16 +1,16 @@
+import { ILocationBase } from "@spt/models/eft/common/ILocationBase";
+import { IGetRaidTimeRequest } from "@spt/models/eft/game/IGetRaidTimeRequest";
+import { IGetRaidTimeResponse } from "@spt/models/eft/game/IGetRaidTimeResponse";
 import type { IPostDBLoadMod } from "@spt/models/external/IPostDBLoadMod";
 import type { IPreSptLoadMod } from "@spt/models/external/IPreSptLoadMod";
 import type { ILogger } from "@spt/models/spt/utils/ILogger";
+import { DatabaseService } from "@spt/services/DatabaseService";
+import { RaidTimeAdjustmentService } from "@spt/services/RaidTimeAdjustmentService";
 import type { StaticRouterModService } from "@spt/services/mod/staticRouter/StaticRouterModService";
 import { DependencyContainer } from "tsyringe";
-import { RaidTimeAdjustmentService } from "@spt/services/RaidTimeAdjustmentService";
-import { IGetRaidTimeRequest } from "@spt/models/eft/game/IGetRaidTimeRequest";
-import { IGetRaidTimeResponse } from "@spt/models/eft/game/IGetRaidTimeResponse";
 import { LocationProcessor } from "./processors/LocationProcessor";
 import { RaidTimeProcessor } from "./processors/RaidTimeProcessor";
 import { ConfigServer } from "./servers/ConfigServer";
-import { ILocationBase } from "@spt/models/eft/common/ILocationBase";
-import { DatabaseService } from "@spt/services/DatabaseService";
 import type { Configuration } from "./types";
 
 /**
@@ -20,6 +20,7 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
     private logger: ILogger;
     private config: Configuration | null = null;
     private container: DependencyContainer;
+    private configServer: ConfigServer;
 
     /**
      * Handle loading the configuration file and registering our custom CustomRaidTimesMatchEnd route.
@@ -28,10 +29,11 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
     public preSptLoad(container: DependencyContainer): void {
         this.container = container;
         this.logger = container.resolve<ILogger>("WinstonLogger");
+        this.configServer = new ConfigServer();
 
         // Load and validate the configuration file.
         try {
-            this.config = new ConfigServer().loadConfig().validateConfig().getConfig();
+            this.config = this.configServer.loadConfig().validateConfig().getConfig();
         } catch (error) {
             this.config = null; // Set the config to null so we know it's failed to load or validate.
             this.logger.log(`CustomRaidTimes: ${error.message}`, "red");
@@ -56,12 +58,12 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
             "CustomRaidTimesMatchEnd",
             [
                 {
-                    url: "/client/match/offline/end",
+                    url: "/client/match/local/end",
                     action: async (url, info, sessionId, output) => {
                         if (this.config?.general?.debug) {
                             this.logger.log(
                                 "CustomRaidTimes: CustomRaidTimesMatchEnd route has been triggered.",
-                                "gray"
+                                "gray",
                             );
                         }
 
@@ -71,7 +73,7 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
                     },
                 },
             ],
-            "CustomRaidTimesMatchEnd"
+            "CustomRaidTimesMatchEnd",
         );
 
         // Register a replacement for the RaidTimeAdjustmentService getRaidAdjustments method if the configuration is
@@ -82,12 +84,12 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
                 (_t, result: RaidTimeAdjustmentService) => {
                     result.getRaidAdjustments = (
                         sessionId: string,
-                        request: IGetRaidTimeRequest
+                        request: IGetRaidTimeRequest,
                     ): IGetRaidTimeResponse => {
                         return this.getRaidAdjustments(request);
                     };
                 },
-                { frequency: "Always" }
+                { frequency: "Always" },
             );
         }
     }
@@ -135,6 +137,9 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
 
         // Engage!
         new LocationProcessor(container).processLocations(this.config);
+
+        // Load a fresh copy of the configuration so we can regenerate random times.
+        this.config = this.configServer.loadConfig().validateConfig().getConfig();
     }
 }
 

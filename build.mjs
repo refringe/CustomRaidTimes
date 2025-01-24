@@ -29,12 +29,12 @@
  * @version v1.0.1
  */
 
-import archiver from "archiver";
-import fs from "fs-extra";
-import ignore from "ignore";
 import os from "node:os";
 import path, { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import archiver from "archiver";
+import fs from "fs-extra";
+import ignore from "ignore";
 import winston from "winston";
 
 // Get the command line arguments to determine whether to use verbose logging.
@@ -61,9 +61,9 @@ const logger = winston.createLogger({
     },
     format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.printf(info => {
+        winston.format.printf((info) => {
             return `${info.level}: ${info.message}`;
-        })
+        }),
     ),
     transports: [
         new winston.transports.Console({
@@ -320,7 +320,7 @@ async function copyFiles(srcDir, destDir, ignoreHandler) {
                 copyOperations.push(
                     fs.copy(srcPath, destPath).then(() => {
                         logger.log("info", `Copied: /${path.relative(process.cwd(), srcPath)}`);
-                    })
+                    }),
                 );
             }
         }
@@ -360,7 +360,7 @@ async function createZipFile(directoryToZip, zipFilePath, containerDirName) {
 
         // Set up an event listener for the 'warning' event to handle warnings appropriately, logging them or rejecting
         // the promise based on the error code.
-        archive.on("warning", err => {
+        archive.on("warning", (err) => {
             if (err.code === "ENOENT") {
                 logger.log("warn", `Archiver issued a warning: ${err.code} - ${err.message}`);
             } else {
@@ -369,7 +369,7 @@ async function createZipFile(directoryToZip, zipFilePath, containerDirName) {
         });
 
         // Set up an event listener for the 'error' event to reject the promise if any error occurs during archiving.
-        archive.on("error", err => {
+        archive.on("error", (err) => {
             reject(err);
         });
 

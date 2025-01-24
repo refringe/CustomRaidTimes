@@ -1,8 +1,8 @@
-import type { Exit, ILocationBase } from "@spt/models/eft/common/ILocationBase";
+import type { IExit, ILocationBase } from "@spt/models/eft/common/ILocationBase";
+import type { ILogger } from "@spt/models/spt/utils/ILogger";
+import { DependencyContainer } from "tsyringe";
 import { LocationProcessor } from "../processors/LocationProcessor";
 import type { Configuration } from "../types";
-import { DependencyContainer } from "tsyringe";
-import type { ILogger } from "@spt/models/spt/utils/ILogger";
 
 /**
  * TrainTimeAdjuster class.
@@ -44,7 +44,7 @@ export class TrainTimeAdjuster {
     /**
      * Handles the brunt of the logic for adjusting the train times.
      */
-    private adjustTrainExit(exit: Exit, config: Configuration): void {
+    private adjustTrainExit(exit: IExit, config: Configuration): void {
         const raidTimeSec = this.location.EscapeTimeLimit * 60;
         const trainExtractWaitSec = exit.ExfiltrationTime;
         let trainWaitSec: number;
@@ -56,7 +56,7 @@ export class TrainTimeAdjuster {
         [trainArriveEarliest, trainArriveLatest] = this.getInitialTrainArrivalTimes(
             raidTimeSec,
             trainExtractWaitSec,
-            trainWaitSec
+            trainWaitSec,
         );
 
         if (!config.trainSchedule.auto) {
@@ -69,7 +69,7 @@ export class TrainTimeAdjuster {
             const calculatedLatestArrival = this.getLatestTrainArrivalTime(
                 raidTimeSec,
                 trainExtractWaitSec,
-                trainWaitSec
+                trainWaitSec,
             );
             if (trainArriveLatest > calculatedLatestArrival) {
                 trainArriveLatest = calculatedLatestArrival;
@@ -84,14 +84,14 @@ export class TrainTimeAdjuster {
             [trainArriveEarliest, trainArriveLatest, trainWaitSec] = this.adjustForLateTrain(
                 trainWaitSec,
                 raidTimeSec,
-                trainExtractWaitSec
+                trainExtractWaitSec,
             );
 
             // We tried, but the train is going too be late. Warn the user.
             if (trainArriveLatest < 0) {
                 this.logger.log(
                     `CustomRaidTimes: ${this.locationName.human} Train Schedule - Train cannot depart before the end of the raid. Raid time is too short.`,
-                    "yellow"
+                    "yellow",
                 );
             }
         }
@@ -113,7 +113,7 @@ export class TrainTimeAdjuster {
         if (config.general.debug) {
             this.logger.log(
                 `CustomRaidTimes: ${this.locationName.human} Train Schedule - Earliest: ${trainArriveEarliestMin} minutes, Latest: ${trainArriveLatestMin} minutes, Wait: ${trainWaitMin} minutes.`,
-                "gray"
+                "gray",
             );
         }
     }
@@ -124,7 +124,7 @@ export class TrainTimeAdjuster {
     private getInitialTrainArrivalTimes(
         raidTimeSec: number,
         trainExtractWaitSec: number,
-        trainWaitSec: number
+        trainWaitSec: number,
     ): [number, number] {
         const latestArrival = this.getLatestTrainArrivalTime(raidTimeSec, trainExtractWaitSec, trainWaitSec);
         let earliestArrival = latestArrival - this.ARRIVE_RANDOM_RANGE_SEC;
@@ -138,10 +138,11 @@ export class TrainTimeAdjuster {
      * Validates that the earliest train arrival time is set to zero (arrives immediately) when it's less than zero.
      */
     private validateEarliestArrivalTime(trainArriveEarliest: number): number {
-        if (trainArriveEarliest < 0) {
-            trainArriveEarliest = 0;
+        let validatedArrivalTime = trainArriveEarliest;
+        if (validatedArrivalTime < 0) {
+            validatedArrivalTime = 0;
         }
-        return trainArriveEarliest;
+        return validatedArrivalTime;
     }
 
     /**
@@ -150,15 +151,16 @@ export class TrainTimeAdjuster {
     private adjustForLateTrain(
         trainWaitSec: number,
         raidTimeSec: number,
-        trainExtractWaitSec: number
+        trainExtractWaitSec: number,
     ): [number, number, number] {
         const trainArriveEarliest = 0;
         let trainArriveLatest = 0;
+        let adjustedTrainWaitSec = trainWaitSec;
         do {
-            trainWaitSec--;
-            trainArriveLatest = this.getLatestTrainArrivalTime(raidTimeSec, trainExtractWaitSec, trainWaitSec);
-        } while (trainArriveLatest < 0 && trainWaitSec > this.MIN_WAIT_SEC);
-        return [trainArriveEarliest, trainArriveLatest, trainWaitSec];
+            adjustedTrainWaitSec--;
+            trainArriveLatest = this.getLatestTrainArrivalTime(raidTimeSec, trainExtractWaitSec, adjustedTrainWaitSec);
+        } while (trainArriveLatest < 0 && adjustedTrainWaitSec > this.MIN_WAIT_SEC);
+        return [trainArriveEarliest, trainArriveLatest, adjustedTrainWaitSec];
     }
 
     /**
@@ -187,7 +189,7 @@ export class TrainTimeAdjuster {
             (
                 Math.random() * (this.BUFFER_ADJUSTMENT_MAX_PERCENT - this.BUFFER_ADJUSTMENT_MIN_PERCENT) +
                 this.BUFFER_ADJUSTMENT_MIN_PERCENT
-            ).toFixed(2)
+            ).toFixed(2),
         );
         return Math.floor(trainArriveEarliest * adjustmentPercentage);
     }

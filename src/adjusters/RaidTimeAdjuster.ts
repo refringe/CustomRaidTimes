@@ -1,8 +1,8 @@
 import type { ILocationBase } from "@spt/models/eft/common/ILocationBase";
+import type { ILogger } from "@spt/models/spt/utils/ILogger";
+import { DependencyContainer } from "tsyringe";
 import { LocationProcessor } from "../processors/LocationProcessor";
 import type { Configuration } from "../types";
-import { DependencyContainer } from "tsyringe";
-import type { ILogger } from "@spt/models/spt/utils/ILogger";
 
 /**
  * RaidTimeAdjuster class.
@@ -36,7 +36,7 @@ export class RaidTimeAdjuster {
         if (config.general.debug && this.location.EscapeTimeLimit !== originalTime) {
             this.logger.log(
                 `CustomRaidTimes: ${this.locationName.human} raid time change from ${originalTime} minutes to ${this.location.EscapeTimeLimit} minutes.`,
-                "gray"
+                "gray",
             );
         }
     }

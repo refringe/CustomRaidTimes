@@ -1,21 +1,22 @@
 {
     "compilerOptions": {
-        "allowJs": true,
+        "allowJs": false,
         "module": "CommonJS",
-        "target": "es2021",
-        "moduleResolution": "node",
+        "target": "ES2022",
+        "moduleResolution": "Node10",
+        "allowSyntheticDefaultImports": true,
+        "declaration": true,
+        "noUncheckedIndexedAccess": true,
+        "moduleDetection": "force",
         "esModuleInterop": true,
         "downlevelIteration": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "resolveJsonModule": true,
-        "strictNullChecks": false,
-        "outDir": "tmp",
         "baseUrl": ".",
         "paths": {
             "@spt/*": ["./types/*"]
         }
     },
-    "lib": ["es2020"],
     "include": ["src/*", "src/**/*"]
 }
