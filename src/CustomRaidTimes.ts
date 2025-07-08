@@ -1,8 +1,8 @@
 import { ILocationBase } from "@spt/models/eft/common/ILocationBase";
 import { IGetRaidTimeRequest } from "@spt/models/eft/game/IGetRaidTimeRequest";
-import { IGetRaidTimeResponse } from "@spt/models/eft/game/IGetRaidTimeResponse";
 import type { IPostDBLoadMod } from "@spt/models/external/IPostDBLoadMod";
 import type { IPreSptLoadMod } from "@spt/models/external/IPreSptLoadMod";
+import { IRaidChanges } from "@spt/models/spt/location/IRaidChanges";
 import type { ILogger } from "@spt/models/spt/utils/ILogger";
 import { DatabaseService } from "@spt/services/DatabaseService";
 import { RaidTimeAdjustmentService } from "@spt/services/RaidTimeAdjustmentService";
@@ -82,11 +82,8 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
             container.afterResolution(
                 "RaidTimeAdjustmentService",
                 (_t, result: RaidTimeAdjustmentService) => {
-                    result.getRaidAdjustments = (
-                        sessionId: string,
-                        request: IGetRaidTimeRequest,
-                    ): IGetRaidTimeResponse => {
-                        return this.getRaidAdjustments(request);
+                    result.getRaidAdjustments = (sessionId: string, request: IGetRaidTimeRequest): IRaidChanges => {
+                        return this.getRaidAdjustments(sessionId, request);
                     };
                 },
                 { frequency: "Always" },
@@ -95,26 +92,33 @@ class CustomRaidTimes implements IPostDBLoadMod, IPreSptLoadMod {
     }
 
     /**
-     * Return the same response as the original method, even if you're a scav.
+     * This method is used to override the default getRaidAdjustments method. This is only used if the `overrideScav`
+     * setting in the configuration file is set to true. If this is not done, the user's custom times will be modified
+     * from the times set in the configuration file possibly causing confusion.
+     *
      * @override @spt/services/RaidTimeAdjustmentService.getRaidAdjustments
      */
-    private getRaidAdjustments(request: IGetRaidTimeRequest): IGetRaidTimeResponse {
+    public getRaidAdjustments(sessionId: string, request: IGetRaidTimeRequest): IRaidChanges {
         const databaseService = this.container.resolve<DatabaseService>("DatabaseService");
 
         const globals = databaseService.getGlobals();
         const mapBase: ILocationBase = databaseService.getLocation(request.Location.toLowerCase()).base;
         const baseEscapeTimeMinutes = mapBase.EscapeTimeLimit;
 
-        const result: IGetRaidTimeResponse = {
-            RaidTimeMinutes: baseEscapeTimeMinutes,
-            ExitChanges: [],
-            NewSurviveTimeSeconds: undefined,
-            OriginalSurvivalTimeSeconds: globals.config.exp.match_end.survived_seconds_requirement,
+        // Prep result object to return
+        const result: IRaidChanges = {
+            newSurviveTimeSeconds: globals.config.exp.match_end.survived_seconds_requirement,
+            originalSurvivalTimeSeconds: globals.config.exp.match_end.survived_seconds_requirement,
+            dynamicLootPercent: 100,
+            staticLootPercent: 100,
+            simulatedRaidStartSeconds: 0,
+            raidTimeMinutes: baseEscapeTimeMinutes,
+            exitChanges: [],
         };
 
         this.logger.log("CustomRaidTimes: The `getRaidAdjustments` override has been triggered.", "cyan");
 
-        return result;
+        return result; // Return here regardless of side.
     }
 
     /**

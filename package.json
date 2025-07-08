@@ -1,10 +1,10 @@
 {
     "name": "custom-raid-times",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "main": "src/CustomRaidTimes.js",
     "license": "MIT",
     "author": "Refringe",
-    "sptVersion": "~3.10",
+    "sptVersion": "~3.11",
     "scripts": {
         "setup": "npm i",
         "postinstall": "node ./postInstall.mjs",
@@ -19,12 +19,12 @@
     },
     "devDependencies": {
         "@biomejs/biome": "1.9.4",
-        "@types/node": "22.10.10",
+        "@types/node": "22.10.5",
         "archiver": "7.0.1",
-        "fs-extra": "11.3.0",
+        "fs-extra": "11.2.0",
         "ignore": "7.0.3",
         "tsyringe": "4.8.0",
-        "typescript": "5.7.3",
+        "typescript": "5.8.2",
         "winston": "3.17.0"
     }
 }

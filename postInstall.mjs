@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /*
- * This script is used to remove the local tsyringe package when running inside the SPT-AKI project directory. This is
- * necessary because the local tsyringe package will override the SPT-AKI tsyringe package, which will cause dependency
+ * This script is used to remove the local tsyringe package when running inside the SPT project directory. This is
+ * necessary because the local tsyringe package will override the SPT tsyringe package, which will cause dependency
  * injection to fail in a very confusing way, which will likely consume your afternoon and make you want to cry. :D
  */
 
