@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>CustomRaidTimes</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+    <Version>2.0.0</Version>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+    <!-- Zip packaging properties -->
+    <ZipOutputPath>$(OutputPath)dist\</ZipOutputPath>
+    <ModFolder>Refringe-CustomRaidTimes</ModFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SPTarkov.Common" Version="4.0.13" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.13" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.13" />
+    <PackageReference Include="SPTarkov.Reflection" Version="4.0.13" />
+  </ItemGroup>
+
+  <!-- Exclude config.json from build output (packaged separately by PackageZip) -->
+  <ItemGroup>
+    <Content Remove="config.json" />
+  </ItemGroup>
+
+  <!-- Package distributable zip after build -->
+  <Target Name="PackageZip" AfterTargets="Build">
+    <PropertyGroup>
+      <StagingPath>$(ZipOutputPath)_zip\SPT\user\mods\$(ModFolder)\</StagingPath>
+    </PropertyGroup>
+    <RemoveDir Directories="$(ZipOutputPath)_zip" />
+    <MakeDir Directories="$(StagingPath)" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(StagingPath)" />
+    <Copy SourceFiles="config.json" DestinationFolder="$(StagingPath)" />
+    <ZipDirectory SourceDirectory="$(ZipOutputPath)_zip" DestinationFile="$(ZipOutputPath)$(ModFolder).zip" Overwrite="true" />
+    <RemoveDir Directories="$(ZipOutputPath)_zip" />
+  </Target>
+</Project>

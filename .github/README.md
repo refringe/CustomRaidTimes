@@ -1,8 +1,8 @@
-# Open Extracts
+# Custom Raid Times
 
 This is a mod for [Single Player Tarkov](https://www.sp-tarkov.com/).
 
-The scope of this mod is to allow the you to adjust your raid times, and have the game still function "normally".
+The scope of this mod is to allow you to adjust your raid times, and have the game still function "normally".
 
 ## Features:
 
@@ -12,29 +12,23 @@ The scope of this mod is to allow the you to adjust your raid times, and have th
     -   Earliest arrival time (given enough overall time) can be anywhere in between 35% to 80% of the total raid time, making train arrival less predictable and also more usable in extra long raids.
     -   The number of seconds the train waits before closing the doors and departing is now randomized; but always between 14 and 7 minutes.
     -   Raids can now be as short as 3 minutes and still have an active and functional train extract.
+-   Override scav raid times to use your custom times instead of the server's default reduction.
 
 _\*Many of these options are configurable._
 
-## To install:
+## To Install:
 
 1. Decompress the contents of the download into your root SPT directory.
-2. Open the `refringe-customraidtimes/config/config.json5` file to adjust configuration options.
-3. Leave a review and let me know what you think.
+2. Open the `SPT/user/mods/Refringe-CustomRaidTimes/config.json` file to adjust configuration options.
 
 If you experience any problems, please [submit a detailed bug report](https://github.com/refringe/CustomRaidTimes/issues).
 
-# To Build Locally:
+## To Build Locally:
 
-This project has been built in [Visual Studio Code](https://code.visualstudio.com/) (VSC) using [Node.js](https://nodejs.org/). If you are unfamiliar with Node.js, I recommend using [NVM](https://github.com/nvm-sh/nvm) to manage installation and switching versions. If you do not wish to use NVM, you will need to install the version of Node.js listed within the `.nvmrc` file manually.
-
-This project uses [Biome](https://biomejs.dev/) to format code on save.
+This project is built with the [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0).
 
 To build the project locally:
 
 1. Clone the repository.
-2. Open the `mod.code-workspace` file in Visual Studio Code (VSC).
-3. Install the [Biome](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) VSC extension.
-4. Install the [JSON5](https://marketplace.visualstudio.com/items?itemName=mrmlnc.vscode-json5) VSC extension.
-5. Run `nvm use` in the terminal.
-6. Run `npm install` in the terminal.
-7. Run `npm run build` in the terminal.
+2. Run `dotnet build -c Release` in the project root.
+3. The distributable zip will be created at `bin/Release/dist/Refringe-CustomRaidTimes.zip`.

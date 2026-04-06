@@ -30,7 +30,7 @@ body:
       label: SPT Version
       description: What version of SPT are you running?
       options:
-        - "3.11"
+        - "4.0"
     validations:
       required: true
   - type: textarea
