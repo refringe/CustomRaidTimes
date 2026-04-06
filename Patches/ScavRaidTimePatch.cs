@@ -13,14 +13,13 @@ namespace CustomRaidTimes.Patches;
 /// Prevents the server from reducing scav raid times when overrideScav is enabled. The patched method returns the base
 /// escape time limit (already set by our mod) with no simulated raid start offset.
 /// </summary>
-public class ScavRaidTimePatch(DatabaseService databaseService) : AbstractPatch
+public class ScavRaidTimePatch : AbstractPatch
 {
     private static DatabaseService? _databaseService;
 
-    public new void Enable()
+    public ScavRaidTimePatch(DatabaseService databaseService)
     {
         _databaseService = databaseService;
-        base.Enable();
     }
 
     protected override MethodBase GetTargetMethod()

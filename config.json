@@ -1,35 +1,30 @@
 {
     "general": {
         "enabled": true,
-
-        // Enables verbose logging for debugging.
         "debug": false
     },
-
     "raidTimes": {
-        // Override raid times for all locations, ignoring custom times set for individual locations.
         "overrideAll": false,
-
-        // Override raid times options. Used for all maps, but only when the above "overrideAll" is set to true.
-        //
-        // These are examples of how to use the various options. If more than one option is provided, the weights are
-        // used to determine how often each object is used. The higher the weight, the more often it is used relative to
-        // the others.
-        //
-        // The minutes and weight options can be a single number, or an object with min and max values which will be
-        // used to generate a random number between the two.
-        //
-        // You can also use a single number for the override option, which will be used for all locations, all the time:
-        // "override": 300,
-        //
         "override": [
-            { "minutes": 60, "weight": 10 },
-            { "minutes": 30, "weight": { "min": 2, "max": 5 } },
-            { "minutes": { "min": 15, "max": 20 }, "weight": 1 }
+            {
+                "minutes": 60,
+                "weight": 10
+            },
+            {
+                "minutes": 30,
+                "weight": {
+                    "min": 2,
+                    "max": 5
+                }
+            },
+            {
+                "minutes": {
+                    "min": 15,
+                    "max": 20
+                },
+                "weight": 1
+            }
         ],
-
-        // Custom raid times for specific locations. Used when "overrideAll" is set to false.
-        // The option can be a number, or an object containing minutes and weight options as described above.
         "customTimes": {
             "customs": 40,
             "factoryDay": 20,
@@ -45,34 +40,11 @@
             "streets": 50,
             "woods": 40
         },
-
-        // Override scav raid times?
         "overrideScav": true
     },
-
     "trainSchedule": {
-        // Enables the automatic train schedule feature. This automatically generates a schedule for the train that fits
-        // within the raid time, and ensures the train arrives with enough time for players to extract. It's *highly*
-        // recommended to leave this enabled.
         "auto": true,
-
         "static": {
-            // All of the following train schedule options are only used when "auto" is set to false.
-            //
-            // WARNING:
-            // - If you don't know what you're doing, don't touch these options. Use the auto schedule feature instead.
-            // - If the sum of the latest arrival time, wait time, train animation time, and extraction time is greater
-            //   than the resolved raid time, the train will not arrive in time for you to exit the raid.
-            // - ABSOLUTELY NO SUPPORT WILL BE PROVIDED FOR USING THIS FEATURE. YOU ARE ON YOUR OWN.
-            //
-            // NOTES:
-            // - Setting "arriveEarliestMinutes" to 20 will have the train arrive (at earliest) 20 minutes into raid.
-            // - Setting "trainWaitSeconds" to 120 will have the train wait 120 seconds after arriving before departing.
-            // - The mod will do its best to ensure that the latest arrival time lands within the raid time if it's
-            //   been set to a time later than the raid time, but I make no guarantee it will work.
-            // - To have the train arrive at a specific time, every time, set "arriveEarliestMinutes" and
-            //   "arriveLatestMinutes" to the same value.
-            // - The defaults are the same as live; 20, 25, 420.
             "arriveEarliestMinutes": 20,
             "arriveLatestMinutes": 25,
             "trainWaitSeconds": 420

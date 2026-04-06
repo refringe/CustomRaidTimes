@@ -1,0 +1,42 @@
+<div style="width: 50%; display: flex; align-items: center; gap: 8px;">
+    <MudSwitch @bind-Value="IsRange"
+               Label="Range"
+               Color="Color.Primary" />
+
+    @if (!IsRange)
+    {
+        <MudNumericField @bind-Value="Value"
+                         Label="@Label"
+                         Variant="Variant.Outlined"
+                         Min="Min" Step="Step" />
+    }
+    else
+    {
+        <MudNumericField @bind-Value="MinValue"
+                         Label="Min"
+                         Variant="Variant.Outlined"
+                         Min="Min" Step="1" />
+        <MudNumericField @bind-Value="MaxValue"
+                         Label="Max"
+                         Variant="Variant.Outlined"
+                         Min="Min" Step="1" />
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public bool IsRange { get; set; }
+    [Parameter] public EventCallback<bool> IsRangeChanged { get; set; }
+
+    [Parameter, EditorRequired] public int Value { get; set; }
+    [Parameter] public EventCallback<int> ValueChanged { get; set; }
+
+    [Parameter, EditorRequired] public int MinValue { get; set; }
+    [Parameter] public EventCallback<int> MinValueChanged { get; set; }
+
+    [Parameter, EditorRequired] public int MaxValue { get; set; }
+    [Parameter] public EventCallback<int> MaxValueChanged { get; set; }
+
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public int Min { get; set; }
+    [Parameter] public int Step { get; set; } = 1;
+}

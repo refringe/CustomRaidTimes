@@ -1,0 +1,47 @@
+@inherits LayoutComponentBase
+@inject ConfigService ConfigService
+@inject CustomRaidTimesPlugin Plugin
+@inject ISnackbar Snackbar
+
+<HeadContent>
+    <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
+</HeadContent>
+
+<MudThemeProvider IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudImage Src="/CustomRaidTimes/Thumbnail.png" Height="32" Class="mr-2" />
+        <MudText Typo="Typo.h6">Custom Raid Times</MudText>
+        <MudSpacer />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   OnClick="SaveConfig">
+            Save
+        </MudButton>
+    </MudAppBar>
+    <MudMainContent Class="pa-4 mt-16">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+<script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+
+@code {
+    private async Task SaveConfig()
+    {
+        try
+        {
+            await ConfigService.SaveAsync();
+            Plugin.ApplyConfig();
+            Snackbar.Add("Configuration saved and applied.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to save: {ex.Message}", Severity.Error);
+        }
+    }
+}

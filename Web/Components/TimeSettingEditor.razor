@@ -1,0 +1,97 @@
+@using CustomRaidTimes.Models
+
+<MudStack Spacing="2">
+    <MudSwitch @bind-Value="Value.IsWeighted"
+               Label="Weighted Mode"
+               Color="Color.Primary" />
+    <MudText Typo="Typo.body2" Class="mt-n1" Style="color: var(--mud-palette-text-secondary);">
+        Enable to define multiple time options with weighted random selection.
+    </MudText>
+
+    @if (!Value.IsWeighted)
+    {
+        <MudNumericField @bind-Value="Value.SimpleValue"
+                         Label="@($"{Label} (minutes)")"
+                         Variant="Variant.Outlined"
+                         Min="1" Step="5" />
+    }
+    else
+    {
+        @foreach (var (entry, index) in Value.Entries.Select((e, i) => (e, i)))
+        {
+            <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudText Typo="Typo.subtitle2" Class="mr-2">@($"#{index + 1}")</MudText>
+
+                    <RangeField @bind-IsRange="entry.MinutesIsRange"
+                                @bind-Value="entry.Minutes"
+                                @bind-MinValue="entry.MinutesMin"
+                                @bind-MaxValue="entry.MinutesMax"
+                                Label="Minutes"
+                                Min="1"
+                                Step="5" />
+
+                    <MudDivider Vertical="true" FlexItem="true" Class="mx-2" />
+
+                    <RangeField @bind-IsRange="entry.WeightIsRange"
+                                @bind-Value="entry.Weight"
+                                @bind-MinValue="entry.WeightMin"
+                                @bind-MaxValue="entry.WeightMax"
+                                Label="Weight"
+                                Min="0"
+                                Step="1" />
+
+                    <MudDivider Vertical="true" FlexItem="true" Class="mx-2" />
+
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Error"
+                                   Size="Size.Small"
+                                   OnClick="() => ConfirmRemoveEntry(index)" />
+                </MudStack>
+            </MudPaper>
+        }
+
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="AddEntry"
+                   Size="Size.Small">
+            Add Entry
+        </MudButton>
+    }
+</MudStack>
+
+@code {
+    [Parameter, EditorRequired]
+    public TimeSetting Value { get; set; } = null!;
+
+    [Parameter]
+    public string Label { get; set; } = "Time";
+
+    [Inject]
+    private IDialogService DialogService { get; set; } = null!;
+
+    private void AddEntry()
+    {
+        Value.Entries.Add(new WeightedEntry { Minutes = 30, Weight = 1 });
+    }
+
+    private async Task ConfirmRemoveEntry(int index)
+    {
+        if (index < 0 || index >= Value.Entries.Count)
+        {
+            return;
+        }
+
+        var result = await DialogService.ShowMessageBox(
+            "Delete Entry",
+            $"Remove entry #{index + 1}?",
+            yesText: "Delete",
+            cancelText: "Cancel");
+
+        if (result == true)
+        {
+            Value.Entries.RemoveAt(index);
+        }
+    }
+}

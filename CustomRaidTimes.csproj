@@ -8,6 +8,9 @@
     <Version>2.0.0</Version>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+    <DebugType>none</DebugType>
 
     <!-- Zip packaging properties -->
     <ZipOutputPath>$(OutputPath)dist\</ZipOutputPath>
@@ -15,10 +18,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SPTarkov.Common" Version="4.0.13" />
-    <PackageReference Include="SPTarkov.DI" Version="4.0.13" />
-    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.13" />
-    <PackageReference Include="SPTarkov.Reflection" Version="4.0.13" />
+    <PackageReference Include="SPTarkov.Common" Version="4.0.13" ExcludeAssets="runtime" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.13" ExcludeAssets="runtime" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.13" ExcludeAssets="runtime" />
+    <PackageReference Include="SPTarkov.Reflection" Version="4.0.13" ExcludeAssets="runtime" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.13" ExcludeAssets="runtime" />
+    <PackageReference Include="MudBlazor" Version="8.13.0" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <!-- Exclude config.json from build output (packaged separately by PackageZip) -->
@@ -33,8 +38,15 @@
     </PropertyGroup>
     <RemoveDir Directories="$(ZipOutputPath)_zip" />
     <MakeDir Directories="$(StagingPath)" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(StagingPath)" />
+    <ItemGroup>
+      <ModDlls Include="$(OutputPath)CustomRaidTimes.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ModDlls)" DestinationFolder="$(StagingPath)" />
     <Copy SourceFiles="config.json" DestinationFolder="$(StagingPath)" />
+    <ItemGroup>
+      <WebAssets Include="wwwroot\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(WebAssets)" DestinationFolder="$(StagingPath)wwwroot\%(RecursiveDir)" />
     <ZipDirectory SourceDirectory="$(ZipOutputPath)_zip" DestinationFile="$(ZipOutputPath)$(ModFolder).zip" Overwrite="true" />
     <RemoveDir Directories="$(ZipOutputPath)_zip" />
   </Target>
