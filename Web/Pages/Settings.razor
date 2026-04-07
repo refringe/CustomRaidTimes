@@ -90,16 +90,19 @@
                                          Label="Earliest Arrival (minutes)"
                                          HelperText="Minutes into the raid before the train can first arrive."
                                          Variant="Variant.Outlined"
+                                         Immediate="true"
                                          Min="0" Step="1" />
                         <MudNumericField @bind-Value="Config.TrainSchedule.Static.ArriveLatestMinutes"
                                          Label="Latest Arrival (minutes)"
                                          HelperText="Minutes into the raid by which the train must arrive."
                                          Variant="Variant.Outlined"
+                                         Immediate="true"
                                          Min="0" Step="1" />
                         <MudNumericField @bind-Value="Config.TrainSchedule.Static.TrainWaitSeconds"
                                          Label="Train Wait (seconds)"
                                          HelperText="Seconds the train waits at the station before departing."
                                          Variant="Variant.Outlined"
+                                         Immediate="true"
                                          Min="0" Step="10" />
                     }
                 </MudStack>

@@ -1,25 +1,35 @@
 <div style="width: 50%; display: flex; align-items: center; gap: 8px;">
-    <MudSwitch @bind-Value="IsRange"
+    <MudSwitch Value="IsRange"
+               ValueChanged="IsRangeChanged"
                Label="Range"
                Color="Color.Primary" />
 
     @if (!IsRange)
     {
-        <MudNumericField @bind-Value="Value"
+        <MudNumericField Value="Value"
+                         ValueChanged="ValueChanged"
                          Label="@Label"
                          Variant="Variant.Outlined"
-                         Min="Min" Step="Step" />
+                         Immediate="true"
+                         Min="Min" Step="Step"
+                         T="int" />
     }
     else
     {
-        <MudNumericField @bind-Value="MinValue"
+        <MudNumericField Value="MinValue"
+                         ValueChanged="MinValueChanged"
                          Label="Min"
                          Variant="Variant.Outlined"
-                         Min="Min" Step="1" />
-        <MudNumericField @bind-Value="MaxValue"
+                         Immediate="true"
+                         Min="Min" Step="1"
+                         T="int" />
+        <MudNumericField Value="MaxValue"
+                         ValueChanged="MaxValueChanged"
                          Label="Max"
                          Variant="Variant.Outlined"
-                         Min="Min" Step="1" />
+                         Immediate="true"
+                         Min="Min" Step="1"
+                         T="int" />
     }
 </div>
 
