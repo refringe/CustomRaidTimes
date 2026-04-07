@@ -18,12 +18,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SPTarkov.Common" Version="4.0.13" ExcludeAssets="runtime" />
-    <PackageReference Include="SPTarkov.DI" Version="4.0.13" ExcludeAssets="runtime" />
-    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.13" ExcludeAssets="runtime" />
-    <PackageReference Include="SPTarkov.Reflection" Version="4.0.13" ExcludeAssets="runtime" />
-    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.13" ExcludeAssets="runtime" />
-    <PackageReference Include="MudBlazor" Version="8.13.0" ExcludeAssets="runtime" />
+    <PackageReference Include="SPTarkov.Common" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.DI" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.Server.Core" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.Reflection" Version="4.0.0" />
+    <PackageReference Include="SPTarkov.Server.Web" Version="4.0.0" />
   </ItemGroup>
 
   <!-- Exclude config.json from build output (packaged separately by PackageZip) -->
